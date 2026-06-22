@@ -6,6 +6,8 @@ A small application that moves [TubeArchivist](https://www.tubearchivist.com/) v
 
 > **Heads up:** this tool moves files and edits your TubeArchivist index
 > directly. Test against a small video first and make sure you have backups.
+>
+> It is strongly recommended to disable the "Refresh Metadata" schedule in TA.
 
 ## What it does
 
