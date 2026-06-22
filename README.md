@@ -2,6 +2,8 @@
 
 A small application that moves [TubeArchivist](https://www.tubearchivist.com/) videos from one channel to another, updating Elasticsearch index and filesystem.
 
+![](./screenshot.png)
+
 > **Heads up:** this tool moves files and edits your TubeArchivist index
 > directly. Test against a small video first and make sure you have backups.
 
