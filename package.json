@@ -1,0 +1,16 @@
+{
+  "name": "tubearchivist-mover",
+  "version": "1.0.0",
+  "description": "Move TubeArchivist videos between channels.",
+  "type": "module",
+  "private": true,
+  "license": "MIT",
+  "author": "mistic100",
+  "scripts": {
+    "dev": "bun --env-file=.env --watch src/server.ts",
+    "start": "bun --env-file=.env src/server.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  }
+}
