@@ -51,12 +51,12 @@ container can reach Elasticsearch by service name:
 
 ```sh
 docker run -d \
-  --name ta-mover \
+  --name tubearchivist-mover \
   --network tubearchivist_default \
   -p 9000:9000 \
   -e ES_URL=http://archivist-es:9200 \
   -e ELASTIC_PASSWORD=verysecret \
-  -v /path/to/tubearchivist/media:/youtube \
+  -v tubearchivist_media:/youtube \
   tubearchivist-mover
 ```
 
@@ -84,7 +84,10 @@ services:
     ports:
       - '9000:9000'
     volumes:
-      - /mnt/storage/youtube:/youtube
+      - media:/youtube
+    depends_on:
+      tubearchivist-es:
+        condition: service_healthy
 ```
 
 ## URL / id behaviour
@@ -97,3 +100,7 @@ all resolve to `UCabc123`.
 
 The app ships **no authentication**. It is intended to run on a trusted network
 alongside your TubeArchivist stack. Do not expose it to the public internet.
+
+## AI Disclaimer
+
+This application has been mostly generated with Claude Opus 4.8 with carefull review by a human.
