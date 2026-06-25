@@ -1,5 +1,5 @@
-import { rename } from "node:fs/promises";
-import { join } from "node:path";
+import { rename, mkdir } from "node:fs/promises";
+import { join, dirname } from "node:path";
 import { config } from "../config.ts";
 import { getChannel } from "../es/channel.ts";
 import { getVideo, updateVideoChannel, type Subtitle } from "../es/video.ts";
@@ -93,6 +93,7 @@ export async function moveVideo(videoId: string, channelId: string): Promise<Mov
                     `Source file not found: ${sourceMp4}`,
                 );
             }
+            await mkdir(dirname(r.to), { recursive: true });
             await rename(r.from, r.to);
             completed.push(r);
         }

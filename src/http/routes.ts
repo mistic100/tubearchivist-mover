@@ -48,6 +48,7 @@ export async function handleApi(req: Request, url: URL): Promise<Response | null
             channel_id: channel.channel_id,
             channel_name: channel.channel_name,
             count: videoIds.length,
+            videoIds,
         });
     }
 
