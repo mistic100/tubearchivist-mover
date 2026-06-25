@@ -159,7 +159,7 @@ class BulkMoveForm extends HTMLElement {
             const videoId = videoIds[i];
             this.progressLabel.textContent = `Moving ${i + 1} of ${total}…`;
             try {
-                const { ok, data } = await postJson("/api/move", { videoId, channelId: targetId });
+                const { ok, data } = await postJson("/api/move-video", { videoId, channelId: targetId });
                 if (ok) {
                     moved++;
                 } else if (data.error === "ALREADY_IN_CHANNEL") {

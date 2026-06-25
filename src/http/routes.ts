@@ -1,5 +1,5 @@
-import { getChannel } from "../es/channel.ts";
-import { getVideo, listChannelVideoIds } from "../es/video.ts";
+import { getChannel, updateChannelName } from "../es/channel.ts";
+import { getVideo, listChannelVideoIds, updateChannelNameOnVideos } from "../es/video.ts";
 import { MoveError, moveVideo, type MoveErrorCode } from "../move/orchestrator.ts";
 
 const STATUS_BY_CODE: Record<MoveErrorCode, number> = {
@@ -48,7 +48,6 @@ export async function handleApi(req: Request, url: URL): Promise<Response | null
             channel_id: channel.channel_id,
             channel_name: channel.channel_name,
             count: videoIds.length,
-            videoIds,
         });
     }
 
@@ -67,7 +66,7 @@ export async function handleApi(req: Request, url: URL): Promise<Response | null
         });
     }
 
-    if (req.method === "POST" && url.pathname === "/api/move") {
+    if (req.method === "POST" && url.pathname === "/api/move-video") {
         let payload: { videoId?: unknown; channelId?: unknown };
         try {
             payload = await req.json() as any;
@@ -88,6 +87,32 @@ export async function handleApi(req: Request, url: URL): Promise<Response | null
             };
             throw err;
         }
+    }
+
+    if (req.method === "POST" && url.pathname === "/api/rename-channel") {
+        let payload: { channelId?: unknown; newName?: unknown };
+        try {
+            payload = await req.json() as any;
+        } catch {
+            return Response.json({ error: "INVALID_INPUT", message: "Invalid JSON body" }, 400);
+        }
+        const channelId = typeof payload.channelId === "string" ? payload.channelId : "";
+        const newName = typeof payload.newName === "string" ? payload.newName.trim() : "";
+        if (!channelId || !newName) {
+            return Response.json({ error: "INVALID_INPUT", message: "channelId and newName are required" }, 400);
+        }
+        const channel = await getChannel(channelId);
+        if (!channel) {
+            return Response.json({ error: "CHANNEL_NOT_FOUND", message: "Channel not found" }, 404);
+        }
+        await updateChannelName(channelId, newName);
+        const updatedVideos = await updateChannelNameOnVideos(channelId, newName);
+        return Response.json({
+            ok: true,
+            channel_id: channelId,
+            channel_name: newName,
+            updatedVideos,
+        });
     }
 
     return null;

@@ -1,54 +1,37 @@
 import { extractId, fetchJson, postJson } from "./utils.js";
 
-class MoveForm extends HTMLElement {
+class RenameChannelForm extends HTMLElement {
     connectedCallback() {
         this.render();
-        this.videoInput = this.querySelector('[name="video"]');
         this.channelInput = this.querySelector('[name="channel"]');
-        this.videoPreview = this.querySelector("#video-preview");
-        this.channelPreview = this.querySelector("#channel-preview");
+        this.nameInput = this.querySelector('[name="name"]');
+        this.channelPreview = this.querySelector("#rename-channel-preview");
         this.form = this.querySelector("form");
         this.submitBtn = this.querySelector('sl-button[type="submit"]');
-        this.alertSlot = this.querySelector("#alert-slot");
+        this.alertSlot = this.querySelector("#rename-alert-slot");
 
-        this.videoInput.addEventListener("sl-change", () => this.previewVideo());
         this.channelInput.addEventListener("sl-change", () => this.previewChannel());
         this.form.addEventListener("submit", (e) => this.onSubmit(e));
     }
 
     render() {
         this.innerHTML = `
-        <div id="alert-slot"></div>
+        <div id="rename-alert-slot"></div>
         <form>
             <div class="field-stack">
                 <div>
-                    <sl-input name="video" label="Video ID or URL" clearable></sl-input>
-                    <div id="video-preview" class="preview"></div>
+                    <sl-input name="channel" label="Channel ID or URL" clearable></sl-input>
+                    <div id="rename-channel-preview" class="preview"></div>
                 </div>
                 <div>
-                    <sl-input name="channel" label="Target channel ID or URL" clearable></sl-input>
-                    <div id="channel-preview" class="preview"></div>
+                    <sl-input name="name" label="New channel name" clearable></sl-input>
                 </div>
             </div>
             <div class="actions">
-                <sl-button type="submit" variant="primary">Move video</sl-button>
+                <sl-button type="submit" variant="primary">Rename channel</sl-button>
             </div>
         </form>
         `;
-    }
-
-    async previewVideo() {
-        const id = extractId(this.videoInput.value);
-        if (!id) {
-            this.setPreview(this.videoPreview, "", false);
-            return;
-        }
-        const { ok, data } = await fetchJson(`/api/video/${encodeURIComponent(id)}`);
-        if (!ok) {
-            this.setPreview(this.videoPreview, data.message, true);
-            return;
-        }
-        this.setPreview(this.videoPreview, `${data.title} — currently in ${data.channel_name}`, false);
     }
 
     async previewChannel() {
@@ -62,7 +45,7 @@ class MoveForm extends HTMLElement {
             this.setPreview(this.channelPreview, data.message, true);
             return;
         }
-        this.setPreview(this.channelPreview, `Target: ${data.channel_name}`, false);
+        this.setPreview(this.channelPreview, `Current name: ${data.channel_name}`, false);
     }
 
     setPreview(el, text, isError) {
@@ -84,25 +67,24 @@ class MoveForm extends HTMLElement {
 
     async onSubmit(e) {
         e.preventDefault();
-        
-        const videoId = extractId(this.videoInput.value);
+
         const channelId = extractId(this.channelInput.value);
-        if (!videoId || !channelId) {
-            this.showAlert("danger", "Both a video and a target channel are required.");
+        const newName = this.nameInput.value.trim();
+        if (!channelId || !newName) {
+            this.showAlert("danger", "Both a channel and a new name are required.");
             return;
         }
 
         this.submitBtn.loading = true;
         try {
-            const { ok, data } = await postJson("/api/move-video", { videoId, channelId });
+            const { ok, data } = await postJson("/api/rename-channel", { channelId, newName });
             if (ok) {
                 this.showAlert(
                     "success",
-                    `Moved ${data.videoId} to ${data.toChannelId} (${data.movedFiles} file(s)).`,
+                    `Renamed channel to "${data.channel_name}" (${data.updatedVideos} video(s) updated).`,
                 );
-                this.videoInput.value = "";
                 this.channelInput.value = "";
-                this.setPreview(this.videoPreview, "", false);
+                this.nameInput.value = "";
                 this.setPreview(this.channelPreview, "", false);
             } else {
                 this.showAlert("danger", data.message);
@@ -115,4 +97,4 @@ class MoveForm extends HTMLElement {
     }
 }
 
-customElements.define("move-form", MoveForm);
+customElements.define("rename-channel-form", RenameChannelForm);

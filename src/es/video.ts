@@ -1,5 +1,5 @@
 import { ChannelDoc } from './channel.ts';
-import { get, update, search } from "./client.ts";
+import { get, update, search, updateByQuery } from "./client.ts";
 
 const VIDEO_INDEX = "ta_video";
 
@@ -41,4 +41,22 @@ export async function updateVideoChannel(
     partial: VideoChannelUpdate,
 ): Promise<void> {
     await update(VIDEO_INDEX, id, partial as unknown as Record<string, unknown>);
+}
+
+/**
+ * Update channel.channel_name on every video belonging to a channel.
+ * Returns the number of videos updated.
+ */
+export async function updateChannelNameOnVideos(
+    channelId: string,
+    newName: string,
+): Promise<number> {
+    return updateByQuery(VIDEO_INDEX, {
+        query: { term: { "channel.channel_id": channelId } },
+        script: {
+            source: "ctx._source.channel.channel_name = params.name",
+            lang: "painless",
+            params: { name: newName },
+        },
+    });
 }

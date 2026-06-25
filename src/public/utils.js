@@ -12,6 +12,9 @@ export function extractId(input) {
 export async function fetchJson(url) {
     const res = await fetch(url);
     const data = await res.json().catch(() => ({}));
+    if (!res.ok && !data.message) {
+        data.message = `Error ${res.status}: ${res.statusText}`;
+    }
     return { ok: res.ok, data };
 }
 

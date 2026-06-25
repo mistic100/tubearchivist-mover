@@ -100,3 +100,34 @@ export async function search<T>(
     };
     return json.hits?.hits ?? [];
 }
+
+/**
+ * Update every document matching a query via the _update_by_query endpoint.
+ * Returns the number of documents updated.
+ */
+export async function updateByQuery(
+    index: string,
+    body: Record<string, unknown>,
+): Promise<number> {
+    const res = await fetch(
+        `${config.esUrl}/${index}/_update_by_query?refresh=true&conflicts=proceed`,
+        {
+            method: "POST",
+            headers: {
+                Authorization: authHeader,
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(body),
+        },
+    );
+
+    if (!res.ok) {
+        throw new EsError(
+            `ES update_by_query failed (${res.status}): ${await res.text()}`,
+            res.status,
+        );
+    }
+
+    const json = (await res.json()) as { updated?: number };
+    return json.updated ?? 0;
+}

@@ -62,9 +62,8 @@ docker run -d \
   tubearchivist-mover
 ```
 
-Adjust `--network`, the `media` volume path, and `ES_URL` to match your
-TubeArchivist deployment. The `media` mount **must** be the same volume TA uses
-so renames land in the directories TA reads from.
+Adjust `--network`, the `tubearchivist_media` volume path, and `ES_URL` to match your
+TubeArchivist deployment.
 
 ## Add to your compose stack
 
@@ -94,7 +93,7 @@ services:
 
 ## URL / id behaviour
 
-Both inputs accept either a bare id or a URL/path — the UI keeps only the segment
+All inputs accept either a bare id or a URL/path — the UI keeps only the segment
 after the last `/`. So `UCabc123` and `http://tubearchivist.local/channel/UCabc123`
 all resolve to `UCabc123`.
 
