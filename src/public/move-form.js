@@ -1,12 +1,10 @@
-import { extractId, fetchJson, postJson } from "./utils.js";
+import { createAlert, extractId, fetchJson, postJson } from "./utils.js";
 
 class MoveForm extends HTMLElement {
     connectedCallback() {
         this.render();
         this.videoInput = this.querySelector('[name="video"]');
         this.channelInput = this.querySelector('[name="channel"]');
-        this.videoPreview = this.querySelector("#video-preview");
-        this.channelPreview = this.querySelector("#channel-preview");
         this.form = this.querySelector("form");
         this.submitBtn = this.querySelector('sl-button[type="submit"]');
         this.alertSlot = this.querySelector("#alert-slot");
@@ -20,19 +18,11 @@ class MoveForm extends HTMLElement {
         this.innerHTML = `
         <div id="alert-slot"></div>
         <form>
-            <div class="field-stack">
-                <div>
-                    <sl-input name="video" label="Video ID or URL" clearable></sl-input>
-                    <div id="video-preview" class="preview"></div>
-                </div>
-                <div>
-                    <sl-input name="channel" label="Target channel ID or URL" clearable></sl-input>
-                    <div id="channel-preview" class="preview"></div>
-                </div>
-            </div>
-            <div class="actions">
-                <sl-button type="submit" variant="primary">Move video</sl-button>
-            </div>
+            <sl-input name="video" label="Video ID or URL" clearable></sl-input>
+            <br />
+            <sl-input name="channel" label="Target channel ID or URL" clearable></sl-input>
+            <br />
+            <sl-button type="submit" variant="primary">Move video</sl-button>
         </form>
         `;
     }
@@ -40,46 +30,37 @@ class MoveForm extends HTMLElement {
     async previewVideo() {
         const id = extractId(this.videoInput.value);
         if (!id) {
-            this.setPreview(this.videoPreview, "", false);
+            this.setPreview(this.videoInput, "");
             return;
         }
         const { ok, data } = await fetchJson(`/api/video/${encodeURIComponent(id)}`);
         if (!ok) {
-            this.setPreview(this.videoPreview, data.message, true);
+            this.setPreview(this.videoInput, data.message);
             return;
         }
-        this.setPreview(this.videoPreview, `${data.title} — currently in ${data.channel_name}`, false);
+        this.setPreview(this.videoInput, `${data.title} — currently in ${data.channel_name}`);
     }
 
     async previewChannel() {
         const id = extractId(this.channelInput.value);
         if (!id) {
-            this.setPreview(this.channelPreview, "", false);
+            this.setPreview(this.channelInput, "");
             return;
         }
         const { ok, data } = await fetchJson(`/api/channel/${encodeURIComponent(id)}`);
         if (!ok) {
-            this.setPreview(this.channelPreview, data.message, true);
+            this.setPreview(this.channelInput, data.message);
             return;
         }
-        this.setPreview(this.channelPreview, `Target: ${data.channel_name}`, false);
+        this.setPreview(this.channelInput, `Target: ${data.channel_name}`);
     }
 
-    setPreview(el, text, isError) {
-        el.textContent = text;
-        el.classList.toggle("error", Boolean(isError));
+    setPreview(el, text) {
+        el.setAttribute('help-text', text);
     }
 
     showAlert(variant, message) {
-        this.alertSlot.innerHTML = "";
-        const alert = document.createElement("sl-alert");
-        alert.variant = variant;
-        alert.closable = true;
-        alert.open = true;
-        alert.innerHTML = `
-        <sl-icon slot="icon" name="${variant === "success" ? "check2-circle" : "exclamation-octagon"}"></sl-icon>${message}
-        `;
-        this.alertSlot.appendChild(alert);
+        this.alertSlot.replaceChildren(createAlert(variant, message));
     }
 
     async onSubmit(e) {
@@ -102,8 +83,8 @@ class MoveForm extends HTMLElement {
                 );
                 this.videoInput.value = "";
                 this.channelInput.value = "";
-                this.setPreview(this.videoPreview, "", false);
-                this.setPreview(this.channelPreview, "", false);
+                this.setPreview(this.videoInput, "");
+                this.setPreview(this.channelInput, "");
             } else {
                 this.showAlert("danger", data.message);
             }

@@ -11,23 +11,22 @@
 </head>
 
 <body>
-    <main class="container">
-        <h1>TubeArchivist Mover</h1>
-        <p class="subtitle">
-            Move TubeArchivist videos between channels.
-        </p>
-        <section class="card">
-            <h2>Move a single video</h2>
-            <move-form></move-form>
-        </section>
-        <section class="card">
-            <h2>Move an entire channel</h2>
-            <bulk-move-form></bulk-move-form>
-        </section>
-        <section class="card">
-            <h2>Rename a channel</h2>
-            <rename-channel-form></rename-channel-form>
-        </section>
+    <main>
+        <header>
+            <h1>TubeArchivist Mover</h1>
+        </header>
+
+        <sl-divider></sl-divider>
+
+        <sl-tab-group placement="start">
+            <sl-tab slot="nav" panel="single">Move a single video</sl-tab>
+            <sl-tab slot="nav" panel="bulk">Move an entire channel</sl-tab>
+            <sl-tab slot="nav" panel="rename">Rename a channel</sl-tab>
+
+            <sl-tab-panel name="single"><move-form></move-form></sl-tab-panel>
+            <sl-tab-panel name="bulk"><bulk-move-form></bulk-move-form></sl-tab-panel>
+            <sl-tab-panel name="rename"><rename-channel-form></rename-channel-form></sl-tab-panel>
+        </sl-tab-group>
     </main>
     <script type="module" src="/app.js"></script>
 </body>

@@ -1,15 +1,14 @@
-import { extractId, fetchJson, postJson } from "./utils.js";
+import { createAlert, extractId, fetchJson, postJson } from "./utils.js";
 
 class BulkMoveForm extends HTMLElement {
     connectedCallback() {
         this.render();
         this.sourceInput = this.querySelector('[name="source"]');
         this.targetInput = this.querySelector('[name="target"]');
-        this.sourcePreview = this.querySelector("#bulk-source-preview");
-        this.targetPreview = this.querySelector("#bulk-target-preview");
         this.form = this.querySelector("form");
         this.submitBtn = this.querySelector('sl-button[type="submit"]');
-        this.alertSlot = this.querySelector("#bulk-alert-slot");
+        this.alertSlot = this.querySelector("#alert-slot");
+
         this.dialog = this.querySelector("#bulk-confirm-dialog");
         this.dialogCount = this.querySelector("#bulk-confirm-count");
         this.confirmBtn = this.querySelector("#bulk-confirm-btn");
@@ -30,21 +29,13 @@ class BulkMoveForm extends HTMLElement {
 
     render() {
         this.innerHTML = `
-        <div id="bulk-alert-slot"></div>
+        <div id="alert-slot"></div>
         <form>
-            <div class="field-stack">
-                <div>
-                    <sl-input name="source" label="Source channel ID or URL" clearable></sl-input>
-                    <div id="bulk-source-preview" class="preview"></div>
-                </div>
-                <div>
-                    <sl-input name="target" label="Target channel ID or URL" clearable></sl-input>
-                    <div id="bulk-target-preview" class="preview"></div>
-                </div>
-            </div>
-            <div class="actions">
-                <sl-button type="submit" variant="primary">Move all videos</sl-button>
-            </div>
+            <sl-input name="source" label="Source channel ID or URL" clearable></sl-input>
+            <br />
+            <sl-input name="target" label="Target channel ID or URL" clearable></sl-input>
+            <br />
+            <sl-button type="submit" variant="primary">Move all videos</sl-button>
         </form>
 
         <div id="bulk-progress-wrap" style="display: none">
@@ -58,6 +49,15 @@ class BulkMoveForm extends HTMLElement {
             <sl-button id="bulk-cancel-btn" slot="footer" variant="default">Cancel</sl-button>
             <sl-button id="bulk-confirm-btn" slot="footer" variant="primary">Move videos</sl-button>
         </sl-dialog>
+
+        <style>
+            #bulk-progress-wrap {
+                margin-top: 1.5rem;
+                display: flex;
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+        </style>
         `;
     }
 
@@ -65,51 +65,38 @@ class BulkMoveForm extends HTMLElement {
         this.sourceCount = null;
         const id = extractId(this.sourceInput.value);
         if (!id) {
-            this.setPreview(this.sourcePreview, "", false);
+            this.setPreview(this.sourceInput, "");
             return;
         }
         const { ok, data } = await fetchJson(`/api/channel/${encodeURIComponent(id)}/videos`);
         if (!ok) {
-            this.setPreview(this.sourcePreview, data.message, true);
+            this.setPreview(this.sourceInput, data.message);
             return;
         }
         this.sourceCount = data.count;
-        this.setPreview(
-            this.sourcePreview,
-            `${data.channel_name}: ${data.count} video(s)`,
-            false,
-        );
+        this.setPreview(this.sourceInput, `${data.channel_name}: ${data.count} video(s)`);
     }
 
     async previewTarget() {
         const id = extractId(this.targetInput.value);
         if (!id) {
-            this.setPreview(this.targetPreview, "", false);
+            this.setPreview(this.targetInput, "");
             return;
         }
         const { ok, data } = await fetchJson(`/api/channel/${encodeURIComponent(id)}`);
         if (!ok) {
-            this.setPreview(this.targetPreview, data.message, true);
+            this.setPreview(this.targetInput, data.message);
             return;
         }
-        this.setPreview(this.targetPreview, `Target: ${data.channel_name}`, false);
+        this.setPreview(this.targetInput, `Target: ${data.channel_name}`);
     }
 
-    setPreview(el, text, isError) {
-        el.textContent = text;
-        el.classList.toggle("error", Boolean(isError));
+    setPreview(el, text) {
+        el.setAttribute('help-text', text);
     }
-
+    
     showAlert(variant, message) {
-        this.alertSlot.innerHTML = "";
-        const alert = document.createElement("sl-alert");
-        alert.variant = variant;
-        alert.closable = true;
-        alert.open = true;
-        alert.innerHTML = `
-        <sl-icon slot="icon" name="${variant === "success" ? "check2-circle" : "exclamation-octagon"}"></sl-icon>${message}
-        `;
-        this.alertSlot.appendChild(alert);
+        this.alertSlot.replaceChildren(createAlert(variant, message));
     }
 
     async onSubmit(e) {
@@ -187,8 +174,8 @@ class BulkMoveForm extends HTMLElement {
         if (failed === 0) {
             this.sourceInput.value = "";
             this.targetInput.value = "";
-            this.setPreview(this.sourcePreview, "", false);
-            this.setPreview(this.targetPreview, "", false);
+            this.setPreview(this.sourceInput, "");
+            this.setPreview(this.targetInput, "");
         }
     }
 }

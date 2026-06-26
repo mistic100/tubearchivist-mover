@@ -27,3 +27,14 @@ export async function postJson(url, body) {
     const data = await res.json().catch(() => ({}));
     return { ok: res.ok, data };
 }
+
+export function createAlert(variant, message) {
+    const alert = document.createElement("sl-alert");
+    alert.variant = variant;
+    alert.closable = true;
+    alert.open = true;
+    alert.innerHTML = `
+    <sl-icon slot="icon" name="${variant === "success" ? "check2-circle" : "exclamation-octagon"}"></sl-icon>${message}
+    `;
+    return alert;
+}
