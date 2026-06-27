@@ -75,7 +75,7 @@ export async function update(
 export async function search<T>(
     index: string,
     body: Record<string, unknown>,
-): Promise<Array<{ _id: string; _source: T }>> {
+): Promise<T[]> {
     const res = await fetch(
         `${config.esUrl}/${index}/_search`,
         {
@@ -98,7 +98,7 @@ export async function search<T>(
     const json = (await res.json()) as {
         hits?: { hits?: Array<{ _id: string; _source: T }> };
     };
-    return json.hits?.hits ?? [];
+    return (json.hits?.hits ?? []).map(hit => hit._source);
 }
 
 /**

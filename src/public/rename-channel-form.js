@@ -26,6 +26,14 @@ class RenameChannelForm extends HTMLElement {
         `;
     }
 
+    setPreview(el, text) {
+        el.setAttribute('help-text', text);
+    }
+    
+    showAlert(variant, message) {
+        this.alertSlot.replaceChildren(createAlert(variant, message));
+    }
+
     async previewChannel() {
         const id = extractId(this.channelInput.value);
         if (!id) {
@@ -38,14 +46,6 @@ class RenameChannelForm extends HTMLElement {
             return;
         }
         this.setPreview(this.channelInput, `Current name: ${data.channel_name}`);
-    }
-
-    setPreview(el, text) {
-        el.setAttribute('help-text', text);
-    }
-    
-    showAlert(variant, message) {
-        this.alertSlot.replaceChildren(createAlert(variant, message));
     }
 
     async onSubmit(e) {

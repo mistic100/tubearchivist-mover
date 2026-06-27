@@ -27,6 +27,14 @@ class MoveForm extends HTMLElement {
         `;
     }
 
+    setPreview(el, text) {
+        el.setAttribute('help-text', text);
+    }
+
+    showAlert(variant, message) {
+        this.alertSlot.replaceChildren(createAlert(variant, message));
+    }
+
     async previewVideo() {
         const id = extractId(this.videoInput.value);
         if (!id) {
@@ -55,17 +63,9 @@ class MoveForm extends HTMLElement {
         this.setPreview(this.channelInput, `Target: ${data.channel_name}`);
     }
 
-    setPreview(el, text) {
-        el.setAttribute('help-text', text);
-    }
-
-    showAlert(variant, message) {
-        this.alertSlot.replaceChildren(createAlert(variant, message));
-    }
-
     async onSubmit(e) {
         e.preventDefault();
-        
+
         const videoId = extractId(this.videoInput.value);
         const channelId = extractId(this.channelInput.value);
         if (!videoId || !channelId) {
@@ -74,25 +74,22 @@ class MoveForm extends HTMLElement {
         }
 
         this.submitBtn.loading = true;
-        try {
-            const { ok, data } = await postJson("/api/move-video", { videoId, channelId });
-            if (ok) {
-                this.showAlert(
-                    "success",
-                    `Moved ${data.videoId} to ${data.toChannelId} (${data.movedFiles} file(s)).`,
-                );
-                this.videoInput.value = "";
-                this.channelInput.value = "";
-                this.setPreview(this.videoInput, "");
-                this.setPreview(this.channelInput, "");
-            } else {
-                this.showAlert("danger", data.message);
-            }
-        } catch (err) {
-            this.showAlert("danger", `Request failed: ${err.message}`);
-        } finally {
-            this.submitBtn.loading = false;
+
+        const { ok, data } = await postJson("/api/move-video", { videoId, channelId });
+        if (ok) {
+            this.showAlert(
+                "success",
+                `Moved ${data.videoId} to ${data.toChannelId} (${data.movedFiles} file(s)).`,
+            );
+            this.videoInput.value = "";
+            this.channelInput.value = "";
+            this.setPreview(this.videoInput, "");
+            this.setPreview(this.channelInput, "");
+        } else {
+            this.showAlert("danger", data.message);
         }
+
+        this.submitBtn.loading = false;
     }
 }
 

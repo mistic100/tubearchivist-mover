@@ -1,4 +1,4 @@
-import { get, update } from "./client.ts";
+import { get, search, update } from "./client.ts";
 
 const CHANNEL_INDEX = "ta_channel";
 
@@ -6,6 +6,12 @@ export interface ChannelDoc {
     channel_id: string;
     channel_name: string;
     [K: string]: any;
+}
+
+export async function getAllChannels(): Promise<ChannelDoc[]> {
+    return (await search<ChannelDoc>(CHANNEL_INDEX, {
+        size: 10000,
+    }));
 }
 
 export async function getChannel(id: string): Promise<ChannelDoc | null> {

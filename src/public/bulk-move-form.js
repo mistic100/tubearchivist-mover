@@ -61,6 +61,14 @@ class BulkMoveForm extends HTMLElement {
         `;
     }
 
+    setPreview(el, text) {
+        el.setAttribute('help-text', text);
+    }
+    
+    showAlert(variant, message) {
+        this.alertSlot.replaceChildren(createAlert(variant, message));
+    }
+
     async previewSource() {
         this.sourceCount = null;
         const id = extractId(this.sourceInput.value);
@@ -89,14 +97,6 @@ class BulkMoveForm extends HTMLElement {
             return;
         }
         this.setPreview(this.targetInput, `Target: ${data.channel_name}`);
-    }
-
-    setPreview(el, text) {
-        el.setAttribute('help-text', text);
-    }
-    
-    showAlert(variant, message) {
-        this.alertSlot.replaceChildren(createAlert(variant, message));
     }
 
     async onSubmit(e) {

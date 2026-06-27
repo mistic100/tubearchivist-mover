@@ -1,5 +1,5 @@
-import { ChannelDoc } from './channel.ts';
-import { get, update, search, updateByQuery } from "./client.ts";
+import { ChannelDoc, getAllChannels } from './channel.ts';
+import { get, search, update, updateByQuery } from "./client.ts";
 
 const VIDEO_INDEX = "ta_video";
 
@@ -25,9 +25,9 @@ export async function listChannelVideoIds(channelId: string): Promise<string[]> 
     const hits = await search<{ youtube_id: string }>(VIDEO_INDEX, {
         query: { term: { "channel.channel_id": channelId } },
         _source: ["youtube_id"],
-        size: 1000,
+        size: 10000,
     });
-    return hits.map((h) => h._source.youtube_id);
+    return hits.map((h) => h.youtube_id);
 }
 
 export interface VideoChannelUpdate {
@@ -59,4 +59,59 @@ export async function updateChannelNameOnVideos(
             params: { name: newName },
         },
     });
+}
+
+/**
+ * Lists all videos where the media_url does not match the channel_id
+ */
+export async function listMediaUrlMismatch(): Promise<VideoDoc[]> {
+    return search<VideoDoc>(VIDEO_INDEX, {
+        "query": {
+            "bool": {
+                "filter": {
+                    "script": {
+                        "script": {
+                            "source": "!doc['media_url'].value.startsWith(doc['channel.channel_id'].value)",
+                            "lang": "painless"
+                        }
+                    }
+                }
+            }
+        },
+        size: 10000,
+    });
+}
+
+/**
+ * Lists all videos where the channel_name does not match with the ta_channel index
+ */
+export async function listChannelNameMismatch(): Promise<(VideoDoc & { actual_channel_name: string })[]> {
+    const results: (VideoDoc & { actual_channel_name: string })[] = [];
+
+    for (const channel of await getAllChannels()) {
+        const hits = await search<VideoDoc>(VIDEO_INDEX, {
+            "query": {
+                "bool": {
+                    "must": {
+                        "term": {
+                            "channel.channel_id": channel.channel_id
+                        }
+                    },
+                    "must_not": {
+                        "match_phrase": {
+                            "channel.channel_name": channel.channel_name
+                        }
+                    }
+                }
+            },
+            size: 10000,
+        });
+
+        results.push(...hits.map(hit => ({
+            ...hit,
+            actual_channel_name: channel.channel_name
+        })));
+    }
+
+    return results;
 }

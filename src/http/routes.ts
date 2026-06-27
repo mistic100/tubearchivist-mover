@@ -1,6 +1,6 @@
 import { getChannel, updateChannelName } from "../es/channel.ts";
-import { getVideo, listChannelVideoIds, updateChannelNameOnVideos } from "../es/video.ts";
-import { MoveError, moveVideo, type MoveErrorCode } from "../move/orchestrator.ts";
+import { getVideo, listChannelNameMismatch, listChannelVideoIds, listMediaUrlMismatch, updateChannelNameOnVideos } from "../es/video.ts";
+import { MoveError, moveVideo, type MoveErrorCode } from "../services/moveVideo.ts";
 
 const STATUS_BY_CODE: Record<MoveErrorCode, number> = {
     INVALID_INPUT: 400,
@@ -65,6 +65,16 @@ export async function handleApi(req: Request, url: URL): Promise<Response | null
             channel_id: channel.channel_id,
             channel_name: channel.channel_name,
         });
+    }
+
+    if (req.method === "GET" && url.pathname === "/api/doctor/media-url-mismatch") {
+        const videos = await listMediaUrlMismatch();
+        return Response.json({ videos });
+    }
+
+    if (req.method === "GET" && url.pathname === "/api/doctor/channel-name-mismatch") {
+        const videos = await listChannelNameMismatch();
+        return Response.json({ videos });
     }
 
     if (req.method === "POST" && url.pathname === "/api/move-video") {
