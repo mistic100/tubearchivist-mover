@@ -1,4 +1,4 @@
-import { getChannel, updateChannelName } from "../es/channel.ts";
+import { getChannel, listEmptyChannels, updateChannelName } from "../es/channel.ts";
 import { getVideo, listChannelNameMismatch, listChannelVideoIds, listMediaUrlMismatch, updateChannelNameOnVideos } from "../es/video.ts";
 import { MoveError, moveVideo, type MoveErrorCode } from "../services/moveVideo.ts";
 
@@ -69,12 +69,17 @@ export async function handleApi(req: Request, url: URL): Promise<Response | null
 
     if (req.method === "GET" && url.pathname === "/api/doctor/media-url-mismatch") {
         const videos = await listMediaUrlMismatch();
-        return Response.json({ videos });
+        return Response.json({ items: videos });
     }
 
     if (req.method === "GET" && url.pathname === "/api/doctor/channel-name-mismatch") {
         const videos = await listChannelNameMismatch();
-        return Response.json({ videos });
+        return Response.json({ items: videos });
+    }
+
+    if (req.method === "GET" && url.pathname === "/api/doctor/empty-channel") {
+        const channels = await listEmptyChannels();
+        return Response.json({ items: channels });
     }
 
     if (req.method === "POST" && url.pathname === "/api/move-video") {

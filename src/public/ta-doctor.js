@@ -53,17 +53,17 @@ class TaDoctorBase extends HTMLElement {
         this._loaded = true;
 
         if (ok) {
-            for (const video of data.videos) {
+            for (const item of data.items) {
                 const alert = document.createElement("sl-alert");
                 alert.variant = "warning";
                 alert.open = true;
                 const container = document.createElement('div');
                 container.className = 'details-container';
-                container.innerHTML = this.formatItem(video);
+                container.innerHTML = this.formatItem(item);
                 alert.appendChild(container);
                 this.content.appendChild(alert);
             }
-            if (data.videos.length === 0) {
+            if (data.items.length === 0) {
                 this.showAlert('success', 'No problem detected');
             } else {
                 // this.fixBtn.style.display = '';
@@ -87,7 +87,7 @@ class TaDoctorBase extends HTMLElement {
         this.fixBtn.loading = false;
     }
 
-    formatItem(video) {
+    formatItem(item) {
         return 'TODO';
     }
 }
@@ -125,6 +125,21 @@ class TaDoctorChannelNameMismatch extends TaDoctorBase {
 
 customElements.define("ta-doctor-channel-name-mismatch", TaDoctorChannelNameMismatch);
 
+
+class TaDoctorEmptyChannel extends TaDoctorBase {
+    _title = 'empty channel';
+    _url = '/api/doctor/empty-channel';
+
+    formatItem(channel) {
+        return `
+        channel_id: <code>${channel.channel_id}</code><br>
+        channel_name: ${channel.channel_name}
+        `;
+    }
+}
+
+customElements.define("ta-doctor-empty-channel", TaDoctorEmptyChannel);
+
 class TaDoctor extends HTMLElement {
     connectedCallback() {
         this.render();
@@ -134,6 +149,7 @@ class TaDoctor extends HTMLElement {
         this.innerHTML = `
         <ta-doctor-media-url-mismatch></ta-doctor-media-url-mismatch>
         <ta-doctor-channel-name-mismatch></ta-doctor-channel-name-mismatch>
+        <ta-doctor-empty-channel></ta-doctor-empty-channel>
         `;
     }
 }

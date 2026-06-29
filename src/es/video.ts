@@ -1,7 +1,7 @@
 import { ChannelDoc, getAllChannels } from './channel.ts';
 import { get, search, update, updateByQuery } from "./client.ts";
 
-const VIDEO_INDEX = "ta_video";
+export const VIDEO_INDEX = "ta_video";
 
 export interface Subtitle {
     media_url: string;

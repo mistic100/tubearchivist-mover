@@ -2,9 +2,7 @@ import { config } from "../config.ts";
 
 const authHeader =
     "Basic " +
-    Buffer.from(`${config.esUser}:${config.esPassword}`).toString(
-        "base64",
-    );
+    Buffer.from(`${config.esUser}:${config.esPassword}`).toString("base64");
 
 export class EsError extends Error {
     constructor(
@@ -16,19 +14,21 @@ export class EsError extends Error {
     }
 }
 
-/**
- * Fetch a document source by index/id. Returns null on 404.
- */
-export async function get<T>(index: string, id: string): Promise<T | null> {
+async function esFetch<T>(url: string): Promise<T>;
+async function esFetch<T>(url: string, body: Record<string, unknown>): Promise<T>;
+async function esFetch<T>(url: string, body?: Record<string, unknown>): Promise<T> {
     const res = await fetch(
-        `${config.esUrl}/${index}/_doc/${encodeURIComponent(id)}`,
+        `${config.esUrl}/${url}`,
         {
-            method: "GET",
-            headers: { Authorization: authHeader },
-        },
+            method: body ? "POST" : "GET",
+            headers: {
+                Authorization: authHeader,
+                "Content-Type": "application/json",
+            },
+            body: body ? JSON.stringify(body) : undefined,
+        }
     );
 
-    if (res.status === 404) return null;
     if (!res.ok) {
         throw new EsError(
             `ES get failed (${res.status}): ${await res.text()}`,
@@ -36,98 +36,46 @@ export async function get<T>(index: string, id: string): Promise<T | null> {
         );
     }
 
-    const body = (await res.json()) as { _source?: T };
-    return body._source ?? null;
+    return (await res.json()) as T;
+}
+
+/**
+ * Count the number of documents matching the query.
+ */
+export async function count(index: string, body: Record<string, unknown>): Promise<number> {
+    const res = await esFetch<{ count: number }>(`${index}/_count`, body);
+    return res.count;
+}
+
+/**
+ * Fetch a document source by index/id.
+ */
+export async function get<T>(index: string, id: string): Promise<T | null> {
+    const res = await esFetch<{ _source?: T }>(`${index}/_doc/${encodeURIComponent(id)}`);
+    return res._source ?? null;
 }
 
 /**
  * Partial update of a document via the _update endpoint.
  */
-export async function update(
-    index: string,
-    id: string,
-    doc: Record<string, unknown>,
-): Promise<void> {
-    const res = await fetch(
-        `${config.esUrl}/${index}/_update/${encodeURIComponent(id)}?refresh=true`,
-        {
-            method: "POST",
-            headers: {
-                Authorization: authHeader,
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ doc }),
-        },
-    );
-
-    if (!res.ok) {
-        throw new EsError(
-            `ES update failed (${res.status}): ${await res.text()}`,
-            res.status,
-        );
-    }
+export async function update(index: string, id: string, doc: Record<string, unknown>): Promise<void> {
+    await esFetch(`${index}/_update/${encodeURIComponent(id)}?refresh=true`, { doc });
 }
 
 /**
  * Run a search query and return the raw hits. Caller supplies the index and
  * request body (query, _source, size, ...).
  */
-export async function search<T>(
-    index: string,
-    body: Record<string, unknown>,
-): Promise<T[]> {
-    const res = await fetch(
-        `${config.esUrl}/${index}/_search`,
-        {
-            method: "POST",
-            headers: {
-                Authorization: authHeader,
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(body),
-        },
-    );
-
-    if (!res.ok) {
-        throw new EsError(
-            `ES search failed (${res.status}): ${await res.text()}`,
-            res.status,
-        );
-    }
-
-    const json = (await res.json()) as {
-        hits?: { hits?: Array<{ _id: string; _source: T }> };
-    };
-    return (json.hits?.hits ?? []).map(hit => hit._source);
+export async function search<T>(index: string, body: Record<string, unknown>): Promise<T[]> {
+    const res = await esFetch<{ hits?: { hits?: Array<{ _source: T }> } }>(`${index}/_search`, body);
+    return (res.hits?.hits ?? []).map(hit => hit._source);
 }
 
 /**
  * Update every document matching a query via the _update_by_query endpoint.
  * Returns the number of documents updated.
  */
-export async function updateByQuery(
-    index: string,
-    body: Record<string, unknown>,
-): Promise<number> {
-    const res = await fetch(
-        `${config.esUrl}/${index}/_update_by_query?refresh=true&conflicts=proceed`,
-        {
-            method: "POST",
-            headers: {
-                Authorization: authHeader,
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(body),
-        },
-    );
-
-    if (!res.ok) {
-        throw new EsError(
-            `ES update_by_query failed (${res.status}): ${await res.text()}`,
-            res.status,
-        );
-    }
-
-    const json = (await res.json()) as { updated?: number };
-    return json.updated ?? 0;
+export async function updateByQuery(index: string, body: Record<string, unknown>): Promise<number> {
+    const res = await esFetch<{ updated?: number }>(`${index}/_update_by_query?refresh=true&conflicts=proceed`, body);
+    return res.updated ?? 0;
 }
