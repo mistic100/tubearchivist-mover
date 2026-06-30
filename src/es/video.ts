@@ -30,15 +30,9 @@ export async function listChannelVideoIds(channelId: string): Promise<string[]> 
     return hits.map((h) => h.youtube_id);
 }
 
-export interface VideoChannelUpdate {
-    channel: ChannelDoc;
-    media_url: string;
-    subtitles?: Subtitle[];
-}
-
-export async function updateVideoChannel(
+export async function updateVideo(
     id: string,
-    partial: VideoChannelUpdate,
+    partial: Partial<VideoDoc>,
 ): Promise<void> {
     await update(VIDEO_INDEX, id, partial as unknown as Record<string, unknown>);
 }

@@ -25,6 +25,8 @@ For a given video id and target channel id it:
 | ------------------ | -------- | ----------- | ----------------------------------- |
 | `PORT`             | no       | `9000`      | HTTP port the server listens on.    |
 | `DATA_DIR`         | no       | `/youtube`  | Root of the shared TA media volume. |
+| `TA_HOST`          | **yes**  |             | HTTP host of TubeArchivist.         |
+| `API_TOKEN`        | **yes**  |             | API token of TubeArchivist.         |
 | `ES_URL`           | **yes**  | —           | Base URL of Elasticsearch.          |
 | `ELASTIC_USER`     | no       | `elastic`   | Elasticsearch username.             |
 | `ELASTIC_PASSWORD` | **yes**  | —           | Elasticsearch password.             |
@@ -56,7 +58,9 @@ docker run -d \
   --name tubearchivist-mover \
   --network tubearchivist_default \
   -p 9000:9000 \
-  -e ES_URL=http://archivist-es:9200 \
+  -e TA_HOST=http://tubearchist:8000 \
+  -e API_TOKEN=verysecret \
+  -e ES_URL=http://tubearchivist-es:9200 \
   -e ELASTIC_PASSWORD=verysecret \
   -v tubearchivist_media:/youtube \
   tubearchivist-mover
@@ -78,9 +82,9 @@ services:
     build: ./tubearchivist-mover
     container_name: tubearchivist-mover
     pull_policy: build
-    env_file:
-      - .env # contains ELASTIC_PASSWORD
+    env_file: .env # contains ELASTIC_PASSWORD and API_TOKEN
     environment:
+      TA_HOST: http://tubearchist:8000
       ES_URL: http://tubearchivist-es:9200
     ports:
       - '9000:9000'

@@ -1,5 +1,50 @@
 import { createAlert, fetchJson, postJson } from './utils.js';
 
+class TaDoctorItem extends HTMLElement {
+    message = '';
+
+    connectedCallback() {
+        this.render();
+        this.fixBtn = this.querySelector('sl-button');
+
+        this.fixBtn.addEventListener('click', () => this.dispatchEvent(new Event('fix')));
+    }
+
+    render() {
+        this.innerHTML = `
+        <sl-alert variant="warning" open>
+            <div class="container">
+                <div class="message">
+                    ${this.message}
+                </div>
+                <sl-button variant="primary">Fix</sl-button>
+            </div>
+        </sl-alert>
+
+        <style>
+        .container {
+            display: flex;
+
+            .message {
+                flex: 1;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+                display: block;
+                overflow: hidden;
+                padding-right: 1em;
+            }
+
+            sl-button {
+                flex: none;
+            }
+        }
+        </style>
+        `;
+    }
+}
+
+customElements.define("ta-doctor-item", TaDoctorItem);
+
 class TaDoctorBase extends HTMLElement {
     _loaded = false;
     _title = 'TODO';
@@ -11,10 +56,8 @@ class TaDoctorBase extends HTMLElement {
         this.content = this.querySelector('#content');
         this.spinner = this.querySelector('sl-spinner');
         this.alertSlot = this.querySelector("#alert-slot");
-        this.fixBtn = this.querySelector('sl-button');
 
         this.details.addEventListener('sl-show', () => this.load());
-        this.fixBtn.addEventListener('click', () => this.runFix());
     }
 
     render() {
@@ -23,17 +66,7 @@ class TaDoctorBase extends HTMLElement {
             <sl-spinner></sl-spinner>
             <div id="alert-slot"></div>
             <div id="content"></div>
-            <sl-button variant="primary" style="display: none">Fix all</sl-button>
         </sl-details>
-
-        <style>
-        .details-container {
-            white-space: nowrap;
-            text-overflow: ellipsis;
-            display: block;
-            overflow: hidden;
-        }
-        </style>
         `;
     }
 
@@ -47,6 +80,7 @@ class TaDoctorBase extends HTMLElement {
         }
 
         this.spinner.style.display = '';
+        this.content.replaceChildren();
 
         const { ok, data } = await fetchJson(this._url);
         this.spinner.style.display = 'none';
@@ -54,40 +88,34 @@ class TaDoctorBase extends HTMLElement {
 
         if (ok) {
             for (const item of data.items) {
-                const alert = document.createElement("sl-alert");
-                alert.variant = "warning";
-                alert.open = true;
-                const container = document.createElement('div');
-                container.className = 'details-container';
-                container.innerHTML = this.formatItem(item);
-                alert.appendChild(container);
+                const alert = document.createElement("ta-doctor-item");
+                alert.message = this.formatItem(item);
+                alert.addEventListener('fix', () => this.runFix(item));
                 this.content.appendChild(alert);
             }
             if (data.items.length === 0) {
                 this.showAlert('success', 'No problem detected');
-            } else {
-                // this.fixBtn.style.display = '';
             }
         } else {
             this.showAlert("danger", data.message);
         }
     }
 
-    async runFix() {
-        this.fixBtn.loading = true;
-
-        const { ok, data } = await postJson(this._url, {});
+    async runFix(item) {
+        const { ok, data } = await postJson(`${this._url}/fix/${this.getItemId(item)}`, {});
         if (ok) {
             this._loaded = false;
-            await this.load();
+            this.load();
         } else {
             this.showAlert("danger", data.message);
         }
-
-        this.fixBtn.loading = false;
     }
 
     formatItem(item) {
+        return 'TODO';
+    }
+
+    getItemId(item) {
         return 'TODO';
     }
 }
@@ -103,6 +131,10 @@ class TaDoctorMediaUrlMismatch extends TaDoctorBase {
         channel_id: <code>${video.channel.channel_id}</code><br>
         media_url: <strong><code>${video.media_url}</code></strong>
         `;
+    }
+
+    getItemId(video) {
+        return video.youtube_id;
     }
 }
 
@@ -121,6 +153,10 @@ class TaDoctorChannelNameMismatch extends TaDoctorBase {
         actual channel_name: <strong>${video.actual_channel_name}</strong>
         `;
     }
+
+    getItemId(video) {
+        return video.youtube_id;
+    }
 }
 
 customElements.define("ta-doctor-channel-name-mismatch", TaDoctorChannelNameMismatch);
@@ -135,6 +171,10 @@ class TaDoctorEmptyChannel extends TaDoctorBase {
         channel_id: <code>${channel.channel_id}</code><br>
         channel_name: ${channel.channel_name}
         `;
+    }
+
+    getItemId(channel) {
+        return channel.channel_id;
     }
 }
 

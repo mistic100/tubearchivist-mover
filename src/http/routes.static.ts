@@ -25,12 +25,12 @@ export async function serveStatic(pathname: string): Promise<Response> {
 
     // Guard against path traversal: the resolved path must stay inside PUBLIC_DIR.
     if (!fullPath.startsWith(PUBLIC_DIR + sep)) {
-        return new Response("Not found", { status: 404 });
+        return new Response(null, { status: 404 });
     }
 
     const file = Bun.file(fullPath);
     if (!(await file.exists())) {
-        return new Response("Not found", { status: 404 });
+        return new Response(null, { status: 404 });
     }
 
     const type = contentTypeFor(rel);

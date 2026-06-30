@@ -1,24 +1,64 @@
 import { config } from "./config.ts";
-import { handleApi } from "./http/routes.ts";
-import { serveStatic } from "./http/static.ts";
+import {
+    handleChannelNameMismatch,
+    handleEmptyChannel,
+    handleFixChannelNameMismatch,
+    handleFixEmptyChannel,
+    handleFixMediaUrlMismatch,
+    handleMediaUrlMismatch,
+} from './http/routes.doctor.ts';
+import { serveStatic } from "./http/routes.static.ts";
+import {
+    handleGetChannel,
+    handleGetChannelVideos,
+    handleGetVideo,
+    handleMoveVideo,
+    handleRenameChannel,
+} from "./http/routes.ts";
 
 const server = Bun.serve({
     port: config.port,
-    async fetch(req) {
-        const url = new URL(req.url);
-        if (url.pathname.startsWith("/api/")) {
-            const apiRes = await handleApi(req, url);
-            if (apiRes) {
-                return apiRes;
-            } else {
-                return Response.json(
-                    { error: "NOT_FOUND", message: "Unknown API route" },
-                    404
-                );
-            }
-        } else {
-            return await serveStatic(url.pathname);
-        }
+    routes: {
+        "/api/video/:id": {
+            GET: async (req) => handleGetVideo(req),
+        },
+        "/api/channel/:id": {
+            GET: async (req) => handleGetChannel(req),
+        },
+        "/api/channel/:id/videos": {
+            GET: async (req) => handleGetChannelVideos(req),
+        },
+        "/api/move-video": {
+            POST: async (req) => handleMoveVideo(req),
+        },
+        "/api/rename-channel": {
+            POST: async (req) => handleRenameChannel(req),
+        },
+
+        "/api/doctor/media-url-mismatch": {
+            GET: async (req) => handleMediaUrlMismatch(req),
+        },
+        "/api/doctor/media-url-mismatch/fix/:id": {
+            POST: async (req) => handleFixMediaUrlMismatch(req),
+        },
+        "/api/doctor/channel-name-mismatch": {
+            GET: async (req) => handleChannelNameMismatch(req),
+        },
+        "/api/doctor/channel-name-mismatch/fix/:id": {
+            POST: async (req) => handleFixChannelNameMismatch(req),
+        },
+        "/api/doctor/empty-channel": {
+            GET: async (req) => handleEmptyChannel(req),
+        },
+        "/api/doctor/empty-channel/fix/:id": {
+            POST: async (req) => handleFixEmptyChannel(req),
+        },
+
+        "/api/*": Response.json(
+            { error: "NOT_FOUND", message: "Unknown API route" },
+            404
+        ),
+        "/*": async (req) => serveStatic(new URL(req.url).pathname),
     },
 });
 

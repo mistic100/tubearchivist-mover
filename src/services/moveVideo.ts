@@ -1,12 +1,12 @@
-import { rename, mkdir } from "node:fs/promises";
-import { join, dirname } from "node:path";
+import { mkdir, rename } from "node:fs/promises";
+import { dirname, join } from "node:path";
 import { config } from "../config.ts";
 import { getChannel } from "../es/channel.ts";
-import { getVideo, updateVideoChannel, type Subtitle } from "../es/video.ts";
+import { getVideo, updateVideo, type Subtitle } from "../es/video.ts";
 
 const ID_PATTERN = /^[A-Za-z0-9_-]+$/;
 
-export type MoveErrorCode =
+type MoveErrorCode =
     | "INVALID_INPUT"
     | "VIDEO_NOT_FOUND"
     | "ALREADY_IN_CHANNEL"
@@ -15,6 +15,16 @@ export type MoveErrorCode =
     | "PREFIX_MISMATCH"
     | "MOVE_FAILED";
 
+const STATUS_BY_CODE: Record<MoveErrorCode, number> = {
+    INVALID_INPUT: 400,
+    VIDEO_NOT_FOUND: 404,
+    ALREADY_IN_CHANNEL: 409,
+    CHANNEL_NOT_FOUND: 404,
+    SOURCE_MISSING: 404,
+    PREFIX_MISMATCH: 422,
+    MOVE_FAILED: 500,
+};
+
 export class MoveError extends Error {
     constructor(
         readonly code: MoveErrorCode,
@@ -22,6 +32,10 @@ export class MoveError extends Error {
     ) {
         super(message);
         this.name = "MoveError";
+    }
+
+    toResponse(): Response {
+        return Response.json({ error: this.code, message: this.message }, STATUS_BY_CODE[this.code]);
     }
 }
 
@@ -98,7 +112,7 @@ export async function moveVideo(videoId: string, channelId: string): Promise<Mov
             completed.push(r);
         }
 
-        await updateVideoChannel(videoId, {
+        await updateVideo(videoId, {
             channel: channel,
             media_url: video.media_url.replace(oldChannelId, channelId),
             subtitles: newSubtitles.length > 0 ? newSubtitles : undefined,
