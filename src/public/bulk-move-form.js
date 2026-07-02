@@ -173,9 +173,7 @@ class BulkMoveForm extends HTMLElement {
 
         if (failed === 0) {
             this.sourceInput.value = "";
-            this.targetInput.value = "";
             this.setPreview(this.sourceInput, "");
-            this.setPreview(this.targetInput, "");
         }
     }
 }

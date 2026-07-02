@@ -82,9 +82,7 @@ class MoveForm extends HTMLElement {
                 `Moved ${data.videoId} to ${data.toChannelId} (${data.movedFiles} file(s)).`,
             );
             this.videoInput.value = "";
-            this.channelInput.value = "";
             this.setPreview(this.videoInput, "");
-            this.setPreview(this.channelInput, "");
         } else {
             this.showAlert("danger", data.message);
         }
