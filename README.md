@@ -9,7 +9,15 @@ A small application that moves [TubeArchivist](https://www.tubearchivist.com/) v
 >
 > It is strongly recommended to disable the "Refresh Metadata" schedule in TA.
 
-## What it does
+
+## Features
+
+- Move a single video to another channel
+- Move all videos of a channel to another
+- Rename a channel
+- Itegrity checks
+
+### Move operation
 
 For a given video id and target channel id it:
 
@@ -17,7 +25,6 @@ For a given video id and target channel id it:
 2. Renames `DATA_DIR/<oldChannelId>/<videoId>.mp4` → `DATA_DIR/<newChannelId>/<videoId>.mp4`.
 3. Renames any subtitle `.vtt` files alongside it.
 4. Updates the video document in Elasticsearch.
-5. If the Elasticsearch update fails, every file rename is rolledback.
 
 ## Environment variables
 
