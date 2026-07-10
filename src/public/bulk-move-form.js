@@ -1,10 +1,10 @@
-import { createAlert, extractId, fetchJson, postJson } from "./utils.js";
+import { createAlert, fetchJson, postJson } from "./utils.js";
+import { loadChannels } from "./common.js";
 
 class BulkMoveForm extends HTMLElement {
     connectedCallback() {
         this.render();
-        this.sourceInput = this.querySelector('[name="source"]');
-        this.targetInput = this.querySelector('[name="target"]');
+        this.sourceSelect = this.querySelector('[name="source"]');
         this.form = this.querySelector("form");
         this.submitBtn = this.querySelector('sl-button[type="submit"]');
         this.alertSlot = this.querySelector("#alert-slot");
@@ -17,23 +17,21 @@ class BulkMoveForm extends HTMLElement {
         this.progressBar = this.querySelector("#bulk-progress");
         this.progressLabel = this.querySelector("#bulk-progress-label");
 
-        // Cached preview state for the source channel.
-        this.sourceCount = null;
-
-        this.sourceInput.addEventListener("sl-change", () => this.previewSource());
-        this.targetInput.addEventListener("sl-change", () => this.previewTarget());
         this.form.addEventListener("submit", (e) => this.onSubmit(e));
         this.confirmBtn.addEventListener("click", () => this.runBulkMove());
         this.cancelBtn.addEventListener("click", () => this.dialog.hide());
+
+        loadChannels(this.form.querySelector('sl-select[name=source]'));
+        loadChannels(this.form.querySelector('sl-select[name=target]'));
     }
 
     render() {
         this.innerHTML = `
         <div id="alert-slot"></div>
         <form>
-            <sl-input name="source" label="Source channel ID or URL" clearable></sl-input>
+            <sl-select name="source" label="Source channel" required hoist clearable></sl-select>
             <br />
-            <sl-input name="target" label="Target channel ID or URL" clearable></sl-input>
+            <sl-select name="target" label="Target channel" required hoist clearable></sl-select>
             <br />
             <sl-button type="submit" variant="primary">Move all videos</sl-button>
         </form>
@@ -60,49 +58,17 @@ class BulkMoveForm extends HTMLElement {
         </style>
         `;
     }
-
-    setPreview(el, text) {
-        el.setAttribute('help-text', text);
-    }
     
     showAlert(variant, message) {
         this.alertSlot.replaceChildren(createAlert(variant, message));
     }
 
-    async previewSource() {
-        this.sourceCount = null;
-        const id = extractId(this.sourceInput.value);
-        if (!id) {
-            this.setPreview(this.sourceInput, "");
-            return;
-        }
-        const { ok, data } = await fetchJson(`/api/channel/${encodeURIComponent(id)}/videos`);
-        if (!ok) {
-            this.setPreview(this.sourceInput, data.message);
-            return;
-        }
-        this.sourceCount = data.count;
-        this.setPreview(this.sourceInput, `${data.channel_name}: ${data.count} video(s)`);
-    }
-
-    async previewTarget() {
-        const id = extractId(this.targetInput.value);
-        if (!id) {
-            this.setPreview(this.targetInput, "");
-            return;
-        }
-        const { ok, data } = await fetchJson(`/api/channel/${encodeURIComponent(id)}`);
-        if (!ok) {
-            this.setPreview(this.targetInput, data.message);
-            return;
-        }
-        this.setPreview(this.targetInput, `Target: ${data.channel_name}`);
-    }
-
     async onSubmit(e) {
         e.preventDefault();
-        const sourceId = extractId(this.sourceInput.value);
-        const targetId = extractId(this.targetInput.value);
+
+        const formData = new FormData(this.form);
+        const sourceId = formData.get('source');
+        const targetId = formData.get('target');
         if (!sourceId || !targetId) {
             this.showAlert("danger", "Both a source and a target channel are required.");
             return;
@@ -172,8 +138,7 @@ class BulkMoveForm extends HTMLElement {
         );
 
         if (failed === 0) {
-            this.sourceInput.value = "";
-            this.setPreview(this.sourceInput, "");
+            this.sourceSelect.setAttribute('value', null);
         }
     }
 }

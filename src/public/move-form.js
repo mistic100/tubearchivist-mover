@@ -1,26 +1,27 @@
 import { createAlert, extractId, fetchJson, postJson } from "./utils.js";
+import { loadChannels } from "./common.js";
 
 class MoveForm extends HTMLElement {
     connectedCallback() {
         this.render();
         this.videoInput = this.querySelector('[name="video"]');
-        this.channelInput = this.querySelector('[name="channel"]');
         this.form = this.querySelector("form");
         this.submitBtn = this.querySelector('sl-button[type="submit"]');
         this.alertSlot = this.querySelector("#alert-slot");
 
         this.videoInput.addEventListener("sl-change", () => this.previewVideo());
-        this.channelInput.addEventListener("sl-change", () => this.previewChannel());
         this.form.addEventListener("submit", (e) => this.onSubmit(e));
+
+        loadChannels(this.form.querySelector('sl-select[name=channel]'));
     }
 
     render() {
         this.innerHTML = `
         <div id="alert-slot"></div>
         <form>
-            <sl-input name="video" label="Video ID or URL" clearable></sl-input>
+            <sl-input name="video" label="Video ID or URL" required clearable></sl-input>
             <br />
-            <sl-input name="channel" label="Target channel ID or URL" clearable></sl-input>
+            <sl-select name="channel" label="Target channel" required hoist clearable></sl-select>
             <br />
             <sl-button type="submit" variant="primary">Move video</sl-button>
         </form>
@@ -49,25 +50,12 @@ class MoveForm extends HTMLElement {
         this.setPreview(this.videoInput, `${data.title} — currently in ${data.channel_name}`);
     }
 
-    async previewChannel() {
-        const id = extractId(this.channelInput.value);
-        if (!id) {
-            this.setPreview(this.channelInput, "");
-            return;
-        }
-        const { ok, data } = await fetchJson(`/api/channel/${encodeURIComponent(id)}`);
-        if (!ok) {
-            this.setPreview(this.channelInput, data.message);
-            return;
-        }
-        this.setPreview(this.channelInput, `Target: ${data.channel_name}`);
-    }
-
     async onSubmit(e) {
         e.preventDefault();
 
-        const videoId = extractId(this.videoInput.value);
-        const channelId = extractId(this.channelInput.value);
+        const formData = new FormData(this.form);
+        const videoId = extractId(formData.get('video'));
+        const channelId = formData.get('channel');
         if (!videoId || !channelId) {
             this.showAlert("danger", "Both a video and a target channel are required.");
             return;
@@ -81,7 +69,7 @@ class MoveForm extends HTMLElement {
                 "success",
                 `Moved ${data.videoId} to ${data.toChannelId} (${data.movedFiles} file(s)).`,
             );
-            this.videoInput.value = "";
+            this.videoInput.setAttribute('value', null);
             this.setPreview(this.videoInput, "");
         } else {
             this.showAlert("danger", data.message);

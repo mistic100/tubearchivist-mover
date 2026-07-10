@@ -88,10 +88,10 @@ class TaDoctorBase extends HTMLElement {
 
         if (ok) {
             for (const item of data.items) {
-                const alert = document.createElement("ta-doctor-item");
-                alert.message = this.formatItem(item);
-                alert.addEventListener('fix', () => this.runFix(item));
-                this.content.appendChild(alert);
+                const itemElt = document.createElement("ta-doctor-item");
+                itemElt.message = this.formatItem(item);
+                itemElt.addEventListener('fix', () => this.runFix(item));
+                this.content.appendChild(itemElt);
             }
             if (data.items.length === 0) {
                 this.showAlert('success', 'No problem detected');

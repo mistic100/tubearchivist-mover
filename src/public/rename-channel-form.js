@@ -1,58 +1,42 @@
-import { createAlert, extractId, fetchJson, postJson } from "./utils.js";
+import { createAlert, fetchJson, postJson } from "./utils.js";
+import { loadChannels } from "./common.js";
 
 class RenameChannelForm extends HTMLElement {
     connectedCallback() {
         this.render();
-        this.channelInput = this.querySelector('[name="channel"]');
-        this.nameInput = this.querySelector('[name="name"]');
+        this.channelSelect = this.querySelector('[name="channel"]');
         this.form = this.querySelector("form");
         this.submitBtn = this.querySelector('sl-button[type="submit"]');
         this.alertSlot = this.querySelector("#alert-slot");
 
-        this.channelInput.addEventListener("sl-change", () => this.previewChannel());
         this.form.addEventListener("submit", (e) => this.onSubmit(e));
+
+        loadChannels(this.form.querySelector('sl-select[name=channel]'));
     }
 
     render() {
         this.innerHTML = `
         <div id="alert-slot"></div>
         <form>
-            <sl-input name="channel" label="Channel ID or URL" clearable></sl-input>
+            <sl-select name="channel" label="Channel" required hoist clearable></sl-select>
             <br />
-            <sl-input name="name" label="New channel name" clearable></sl-input>
+            <sl-input name="name" label="New channel name" clearable required></sl-input>
             <br />
             <sl-button type="submit" variant="primary">Rename channel</sl-button>
         </form>
         `;
-    }
-
-    setPreview(el, text) {
-        el.setAttribute('help-text', text);
     }
     
     showAlert(variant, message) {
         this.alertSlot.replaceChildren(createAlert(variant, message));
     }
 
-    async previewChannel() {
-        const id = extractId(this.channelInput.value);
-        if (!id) {
-            this.setPreview(this.channelInput, "");
-            return;
-        }
-        const { ok, data } = await fetchJson(`/api/channel/${encodeURIComponent(id)}`);
-        if (!ok) {
-            this.setPreview(this.channelInput, data.message);
-            return;
-        }
-        this.setPreview(this.channelInput, `Current name: ${data.channel_name}`);
-    }
-
     async onSubmit(e) {
         e.preventDefault();
 
-        const channelId = extractId(this.channelInput.value);
-        const newName = this.nameInput.value.trim();
+        const formData = new FormData(this.form);
+        const channelId = formData.get('channel');
+        const newName = formData.get('name').trim();
         if (!channelId || !newName) {
             this.showAlert("danger", "Both a channel and a new name are required.");
             return;
@@ -66,9 +50,8 @@ class RenameChannelForm extends HTMLElement {
                     "success",
                     `Renamed channel to "${data.channel_name}" (${data.updatedVideos} video(s) updated).`,
                 );
-                this.channelInput.value = "";
-                this.nameInput.value = "";
-                this.setPreview(this.channelInput, "");
+                this.channelSelect.setAttribute('value', null);
+                this.nameInput.setAttribute('value', null);
             } else {
                 this.showAlert("danger", data.message);
             }
