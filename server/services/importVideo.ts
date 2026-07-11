@@ -1,9 +1,11 @@
 import { $ } from "bun";
 import { mkdir, readdir, rename } from "node:fs/promises";
-import { basename, dirname, extname, join } from "node:path";
+import { dirname, extname, join } from "node:path";
+import { VideoDoc } from '../../types/VideoDoc';
 import { config } from "../config.ts";
 import { getChannel } from '../es/channel.ts';
-import { createVideo, getVideo, VideoDoc } from '../es/video.ts';
+import { createVideo } from '../es/video.ts';
+import { ImportQuery } from '../../types/ImportQuery';
 
 const IMPORT_FOLDER = 'import';
 const ALLOWED_VIDEO_EXTENSIONS = [".mp4", ".mkv", ".webm"];
@@ -19,14 +21,6 @@ export async function listImportFiles(): Promise<string[]> {
         .filter((entry) => ALLOWED_VIDEO_EXTENSIONS.includes(extname(entry.name).toLowerCase()))
         .map((entry) => entry.name);
 }
-
-export type ImportData = {
-    video: string;
-    channel: string;
-    title: string;
-    published: string;
-    category: string;
-};
 
 type ImportErrorCode =
     | "INVALID_INPUT"
@@ -72,25 +66,25 @@ type FFprobeResult = {
     };
 };
 
-export async function importVideo(importData: ImportData): Promise<VideoDoc & { url: string }> {
-    console.log('Import video', importData);
+export async function importVideo(payload: ImportQuery): Promise<VideoDoc & { url: string }> {
+    console.log('Import video', payload);
 
-    if (!importData.video || !importData.channel || !importData.title || !importData.published) {
+    if (!payload.video || !payload.channel || !payload.title || !payload.published) {
         throw new ImportError(
             "INVALID_INPUT",
             `Incomplete request`
         );
     }
 
-    const channel = await getChannel(importData.channel);
+    const channel = await getChannel(payload.channel);
     if (!channel) {
         throw new ImportError(
             "CHANNEL_NOT_FOUND",
-            `Channel "${importData.channel}" not found`
+            `Channel "${payload.channel}" not found`
         );
     }
 
-    const sourceFile = join(config.dataDir, IMPORT_FOLDER, importData.video);
+    const sourceFile = join(config.dataDir, IMPORT_FOLDER, payload.video);
     if (!(await Bun.file(sourceFile).exists())) {
         throw new ImportError(
             "SOURCE_MISSING",
@@ -103,7 +97,7 @@ export async function importVideo(importData: ImportData): Promise<VideoDoc & { 
     const newId = 'cust-' + generateRandomString(6);
     const now = Math.round(new Date().getTime() / 1000);
     const duration = Math.round(parseFloat(probe.format.duration));
-    const published = Math.round(Date.parse(`${importData.published}`) / 1000);
+    const published = Math.round(Date.parse(`${payload.published}`) / 1000);
 
     console.log(`New ID is "${newId}"`);
 
@@ -123,11 +117,11 @@ export async function importVideo(importData: ImportData): Promise<VideoDoc & { 
 
     const video: VideoDoc = {
         "active": false,
-        "category": importData.category ? [importData.category] : [],
+        "category": payload.category ? [payload.category] : [],
         "date_downloaded": now,
         "published": published,
         "tags": [],
-        "title": importData.title,
+        "title": payload.title,
         "vid_last_refresh": now,
         "vid_thumb_url": "",
         "vid_type": "videos",

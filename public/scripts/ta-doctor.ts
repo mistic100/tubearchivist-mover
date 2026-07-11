@@ -1,13 +1,16 @@
-import { createAlert, fetchJson, postJson } from './utils.js';
+import { SlSpinner } from '@shoelace-style/shoelace';
+import { ChannelDoc } from '../../types/ChannelDoc';
+import { ChannelNameMismatchDoc } from '../../types/ChannelNameMismatchDoc';
+import { VideoDoc } from '../../types/VideoDoc';
+import { createAlert, fetchJson, postJson } from './utils.ts';
 
 class TaDoctorItem extends HTMLElement {
     message = '';
 
     connectedCallback() {
         this.render();
-        this.fixBtn = this.querySelector('sl-button');
 
-        this.fixBtn.addEventListener('click', () => this.dispatchEvent(new Event('fix')));
+        this.querySelector('sl-button')!.addEventListener('click', () => this.dispatchEvent(new Event('fix')));
     }
 
     render() {
@@ -45,19 +48,23 @@ class TaDoctorItem extends HTMLElement {
 
 customElements.define("ta-doctor-item", TaDoctorItem);
 
-class TaDoctorBase extends HTMLElement {
+abstract class TaDoctorBase<T> extends HTMLElement {
+    private content: HTMLElement;
+    private spinner: SlSpinner;
+    private alertSlot: HTMLElement;
+    
+    abstract _title: string;
+    abstract _url: string;
+    
     _loaded = false;
-    _title = 'TODO';
-    _url = 'TODO';
 
     connectedCallback() {
         this.render();
-        this.details = this.querySelector('sl-details');
-        this.content = this.querySelector('#content');
-        this.spinner = this.querySelector('sl-spinner');
-        this.alertSlot = this.querySelector("#alert-slot");
+        this.content = this.querySelector('#content')!;
+        this.spinner = this.querySelector('sl-spinner')!;
+        this.alertSlot = this.querySelector("#alert-slot")!;
 
-        this.details.addEventListener('sl-show', () => this.load());
+        this.querySelector('sl-details')!.addEventListener('sl-show', () => this.load());
     }
 
     render() {
@@ -70,7 +77,7 @@ class TaDoctorBase extends HTMLElement {
         `;
     }
 
-    showAlert(variant, message) {
+    showAlert(variant: "danger" | "success", message: string) {
         this.alertSlot.replaceChildren(createAlert(variant, message));
     }
 
@@ -82,13 +89,13 @@ class TaDoctorBase extends HTMLElement {
         this.spinner.style.display = '';
         this.content.replaceChildren();
 
-        const { ok, data } = await fetchJson(this._url);
+        const { ok, data } = await fetchJson<{ items: T[] }>(this._url);
         this.spinner.style.display = 'none';
         this._loaded = true;
 
         if (ok) {
             for (const item of data.items) {
-                const itemElt = document.createElement("ta-doctor-item");
+                const itemElt = document.createElement("ta-doctor-item") as TaDoctorItem;
                 itemElt.message = this.formatItem(item);
                 itemElt.addEventListener('fix', () => this.runFix(item));
                 this.content.appendChild(itemElt);
@@ -101,7 +108,7 @@ class TaDoctorBase extends HTMLElement {
         }
     }
 
-    async runFix(item) {
+    async runFix(item: T) {
         const { ok, data } = await postJson(`${this._url}/fix/${this.getItemId(item)}`, {});
         if (ok) {
             this._loaded = false;
@@ -111,20 +118,16 @@ class TaDoctorBase extends HTMLElement {
         }
     }
 
-    formatItem(item) {
-        return 'TODO';
-    }
+    abstract formatItem(item: T): string;
 
-    getItemId(item) {
-        return 'TODO';
-    }
+    abstract getItemId(item: T): string;
 }
 
-class TaDoctorMediaUrlMismatch extends TaDoctorBase {
+class TaDoctorMediaUrlMismatch extends TaDoctorBase<VideoDoc> {
     _title = 'media_url mismatch';
     _url = '/api/doctor/media-url-mismatch';
 
-    formatItem(video) {
+    formatItem(video: VideoDoc) {
         return `
         youtube_id: <strong><code>${video.youtube_id}</code></strong><br>
         title: ${video.title}<br>
@@ -133,18 +136,18 @@ class TaDoctorMediaUrlMismatch extends TaDoctorBase {
         `;
     }
 
-    getItemId(video) {
+    getItemId(video: VideoDoc) {
         return video.youtube_id;
     }
 }
 
 customElements.define("ta-doctor-media-url-mismatch", TaDoctorMediaUrlMismatch);
 
-class TaDoctorChannelNameMismatch extends TaDoctorBase {
+class TaDoctorChannelNameMismatch extends TaDoctorBase<ChannelNameMismatchDoc> {
     _title = 'channel_name mismatch';
     _url = '/api/doctor/channel-name-mismatch';
 
-    formatItem(video) {
+    formatItem(video: ChannelNameMismatchDoc) {
         return `
         youtube_id: <strong><code>${video.youtube_id}</code></strong><br>
         title: ${video.title}<br>
@@ -154,7 +157,7 @@ class TaDoctorChannelNameMismatch extends TaDoctorBase {
         `;
     }
 
-    getItemId(video) {
+    getItemId(video: ChannelNameMismatchDoc) {
         return video.youtube_id;
     }
 }
@@ -162,18 +165,18 @@ class TaDoctorChannelNameMismatch extends TaDoctorBase {
 customElements.define("ta-doctor-channel-name-mismatch", TaDoctorChannelNameMismatch);
 
 
-class TaDoctorEmptyChannel extends TaDoctorBase {
+class TaDoctorEmptyChannel extends TaDoctorBase<ChannelDoc> {
     _title = 'empty channel';
     _url = '/api/doctor/empty-channel';
 
-    formatItem(channel) {
+    formatItem(channel: ChannelDoc) {
         return `
         channel_id: <code>${channel.channel_id}</code><br>
         channel_name: ${channel.channel_name}
         `;
     }
 
-    getItemId(channel) {
+    getItemId(channel: ChannelDoc) {
         return channel.channel_id;
     }
 }

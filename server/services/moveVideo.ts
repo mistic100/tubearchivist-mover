@@ -1,8 +1,11 @@
 import { mkdir, rename } from "node:fs/promises";
 import { dirname, join } from "node:path";
+import { MoveQuery } from '../../types/MoveQuery';
+import { MoveResult } from '../../types/MoveResult';
+import { Subtitle } from '../../types/VideoDoc';
 import { config } from "../config.ts";
 import { getChannel } from "../es/channel.ts";
-import { getVideo, updateVideo, type Subtitle } from "../es/video.ts";
+import { getVideo, updateVideo } from "../es/video.ts";
 
 type MoveErrorCode =
     | "INVALID_INPUT"
@@ -37,20 +40,15 @@ export class MoveError extends Error {
     }
 }
 
-export interface MoveResult {
-    videoId: string;
-    fromChannelId: string;
-    toChannelId: string;
-    movedFiles: number;
-}
-
 interface FileRename {
     from: string;
     to: string;
 }
 
-export async function moveVideo(videoId: string, channelId: string): Promise<MoveResult> {
-    console.log('Move video', { videoId, channelId });
+export async function moveVideo(payload: MoveQuery): Promise<MoveResult> {
+    console.log('Move video', payload);
+
+    const { videoId, channelId } = payload;
 
     if (!videoId || !channelId) {
         throw new MoveError(

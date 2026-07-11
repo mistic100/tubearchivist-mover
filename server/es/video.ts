@@ -1,50 +1,9 @@
-import { ChannelDoc, getAllChannels } from './channel.ts';
+import { ChannelNameMismatchDoc } from '../../types/ChannelNameMismatchDoc';
+import { VideoDoc } from '../../types/VideoDoc';
+import { getAllChannels } from './channel.ts';
 import { create, get, search, update, updateByQuery } from "./client.ts";
 
 export const VIDEO_INDEX = "ta_video";
-
-export interface Subtitle {
-    media_url: string;
-    [K: string]: any;
-}
-
-export interface VideoDoc {
-    active: boolean;
-    category: string[];
-    date_downloaded: number;
-    published: number;
-    tags: string[];
-    title: string;
-    vid_last_refresh: number;
-    vid_thumb_url: string;
-    vid_type: "videos" | "streams";
-    youtube_id: string;
-    description: string;
-    channel: ChannelDoc;
-    stats: {
-        view_count: number;
-        like_count: number;
-        dislike_count: number;
-        average_rating: number;
-    };
-    media_url: string;
-    player: {
-        duration: number;
-        duration_str: string;
-        watched: boolean;
-        watched_date?: number;
-    };
-    streams: Array<{
-        index: number;
-        bitrate: number;
-        codec: string;
-        type: string;
-        width?: number;
-        height?: number;
-    }>;
-    media_size: number;
-    subtitles?: Subtitle[];
-}
 
 export async function getVideo(id: string): Promise<VideoDoc | null> {
     return get<VideoDoc>(VIDEO_INDEX, id);
@@ -115,8 +74,8 @@ export async function listMediaUrlMismatch(): Promise<VideoDoc[]> {
 /**
  * Lists all videos where the channel_name does not match with the ta_channel index
  */
-export async function listChannelNameMismatch(): Promise<(VideoDoc & { actual_channel_name: string })[]> {
-    const results: (VideoDoc & { actual_channel_name: string })[] = [];
+export async function listChannelNameMismatch(): Promise<ChannelNameMismatchDoc[]> {
+    const results: ChannelNameMismatchDoc[] = [];
 
     for (const channel of await getAllChannels()) {
         const hits = await search<VideoDoc>(VIDEO_INDEX, {

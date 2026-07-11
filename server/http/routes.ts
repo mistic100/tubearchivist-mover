@@ -1,7 +1,10 @@
 import { BunRequest } from 'bun';
+import { ChannelRenameQuery } from '../../types/ChannelRenameQuery';
+import { ImportQuery } from '../../types/ImportQuery';
+import { MoveQuery } from '../../types/MoveQuery';
 import { getAllChannels, getChannel } from "../es/channel.ts";
 import { getVideo, listChannelVideoIds } from "../es/video.ts";
-import { ImportData, ImportError, importVideo, listImportFiles } from '../services/importVideo.ts';
+import { ImportError, importVideo, listImportFiles } from '../services/importVideo.ts';
 import { MoveError, moveVideo } from "../services/moveVideo.ts";
 import { renameChannel, RenameError } from '../services/renameChannel.ts';
 
@@ -10,12 +13,7 @@ export async function handleGetVideo(req: BunRequest<":id">) {
     if (!video) {
         return Response.json({ error: "VIDEO_NOT_FOUND", message: "Video not found" }, 404);
     }
-    return Response.json({
-        youtube_id: video.youtube_id,
-        channel_id: video.channel.channel_id,
-        channel_name: video.channel.channel_name,
-        title: video.title,
-    });
+    return Response.json(video);
 }
 
 export async function handleGetChannelVideos(req: BunRequest<":id">) {
@@ -26,9 +24,7 @@ export async function handleGetChannelVideos(req: BunRequest<":id">) {
 
     const videoIds = await listChannelVideoIds(req.params.id);
     return Response.json({
-        channel_id: channel.channel_id,
-        channel_name: channel.channel_name,
-        count: videoIds.length,
+        ...channel,
         videoIds,
     });
 }
@@ -52,10 +48,10 @@ export async function handleGetChannel(req: BunRequest<":id">) {
 }
 
 export async function handleMoveVideo(req: Request) {
-    const payload = await req.json() as { videoId: string; channelId: string };
+    const payload = await req.json() as MoveQuery;
 
     try {
-        const result = await moveVideo(payload.videoId, payload.channelId);
+        const result = await moveVideo(payload);
         return Response.json(result);
     } catch (err) {
         if (err instanceof MoveError) {
@@ -66,10 +62,10 @@ export async function handleMoveVideo(req: Request) {
 }
 
 export async function handleRenameChannel(req: Request) {
-    const payload = await req.json() as  { channelId: string; newName: string };
+    const payload = await req.json() as ChannelRenameQuery;
 
     try {
-        const result = await renameChannel(payload.channelId, payload.newName);
+        const result = await renameChannel(payload);
         return Response.json(result);
     } catch (err) {
         if (err instanceof RenameError) {
@@ -85,7 +81,7 @@ export async function handleGetImports(req: Request) {
 }
 
 export async function handleImport(req: Request) {
-    const payload = await req.json() as ImportData;
+    const payload = await req.json() as ImportQuery;
 
     try {
         const result = await importVideo(payload);

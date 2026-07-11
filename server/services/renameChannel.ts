@@ -1,3 +1,5 @@
+import { ChannelRenameQuery } from '../../types/ChannelRenameQuery';
+import { ChannelRenameResult } from '../../types/ChannelRenameResult';
 import { getChannel, updateChannel } from '../es/channel';
 import { updateChannelNameOnVideos } from '../es/video';
 
@@ -24,8 +26,10 @@ export class RenameError extends Error {
     }
 }
 
-export async function renameChannel(channelId: string, newName: string): Promise<{ updatedVideos: number }> {
-    console.log('Rename channel', { channelId, newName });
+export async function renameChannel(payload: ChannelRenameQuery): Promise<ChannelRenameResult> {
+    console.log('Rename channel', payload);
+
+    const { channelId, newName } = payload;
 
     if (!channelId || !newName) {
         throw new RenameError(

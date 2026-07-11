@@ -1,28 +1,41 @@
-import { createAlert, fetchJson, postJson } from "./utils.js";
-import { loadChannels } from "./common.js";
+import { SlButton, SlDialog, SlProgressBar, SlSelect } from '@shoelace-style/shoelace';
+import { ChannelDoc } from '../../types/ChannelDoc';
+import { MoveQuery } from '../../types/MoveQuery';
+import { MoveResult } from '../../types/MoveResult';
+import { loadChannels } from "./common.ts";
+import { createAlert, fetchJson, postJson } from "./utils.ts";
 
 class BulkMoveForm extends HTMLElement {
+    private sourceSelect: SlSelect;
+    private form: HTMLFormElement;
+    private submitBtn: SlButton;
+    private alertSlot: HTMLElement;
+    private dialog: SlDialog;
+    private dialogCount: HTMLElement;
+    private progressWrap: HTMLElement;
+    private progressBar: SlProgressBar;
+    private progressLabel: HTMLElement;
+
+    private pendingMove: { targetId: string, videoIds: string[] };
+
     connectedCallback() {
         this.render();
-        this.sourceSelect = this.querySelector('[name="source"]');
-        this.form = this.querySelector("form");
-        this.submitBtn = this.querySelector('sl-button[type="submit"]');
-        this.alertSlot = this.querySelector("#alert-slot");
+        this.sourceSelect = this.querySelector('[name="source"]')!;
+        this.form = this.querySelector("form")!;
+        this.submitBtn = this.querySelector('sl-button[type="submit"]')!;
+        this.alertSlot = this.querySelector("#alert-slot")!;
 
-        this.dialog = this.querySelector("#bulk-confirm-dialog");
-        this.dialogCount = this.querySelector("#bulk-confirm-count");
-        this.confirmBtn = this.querySelector("#bulk-confirm-btn");
-        this.cancelBtn = this.querySelector("#bulk-cancel-btn");
-        this.progressWrap = this.querySelector("#bulk-progress-wrap");
-        this.progressBar = this.querySelector("#bulk-progress");
-        this.progressLabel = this.querySelector("#bulk-progress-label");
+        this.dialog = this.querySelector("#bulk-confirm-dialog")!;
+        this.dialogCount = this.querySelector("#bulk-confirm-count")!;
+        this.progressWrap = this.querySelector("#bulk-progress-wrap")!;
+        this.progressBar = this.querySelector("#bulk-progress")!;
 
         this.form.addEventListener("submit", (e) => this.onSubmit(e));
-        this.confirmBtn.addEventListener("click", () => this.runBulkMove());
-        this.cancelBtn.addEventListener("click", () => this.dialog.hide());
+        this.dialog.querySelector("#bulk-confirm-btn")!.addEventListener("click", () => this.runBulkMove());
+        this.dialog.querySelector("#bulk-cancel-btn")!.addEventListener("click", () => this.dialog.hide());
 
-        loadChannels(this.form.querySelector('sl-select[name=source]'));
-        loadChannels(this.form.querySelector('sl-select[name=target]'));
+        loadChannels(this.form.querySelector('sl-select[name=source]')!);
+        loadChannels(this.form.querySelector('sl-select[name=target]')!);
     }
 
     render() {
@@ -58,17 +71,17 @@ class BulkMoveForm extends HTMLElement {
         </style>
         `;
     }
-    
-    showAlert(variant, message) {
+
+    showAlert(variant: "danger" | "success" | "warning", message: string) {
         this.alertSlot.replaceChildren(createAlert(variant, message));
     }
 
-    async onSubmit(e) {
+    async onSubmit(e: Event) {
         e.preventDefault();
 
         const formData = new FormData(this.form);
-        const sourceId = formData.get('source');
-        const targetId = formData.get('target');
+        const sourceId = formData.get('source') as string;
+        const targetId = formData.get('target') as string;
         if (!sourceId || !targetId) {
             this.showAlert("danger", "Both a source and a target channel are required.");
             return;
@@ -79,18 +92,18 @@ class BulkMoveForm extends HTMLElement {
         }
 
         // Always fetch a fresh list right before confirming.
-        const { ok, data } = await fetchJson(`/api/channel/${encodeURIComponent(sourceId)}/videos`);
+        const { ok, data } = await fetchJson<ChannelDoc & { videoIds: string[] }>(`/api/channel/${encodeURIComponent(sourceId)}/videos`);
         if (!ok) {
             this.showAlert("danger", data.message);
             return;
         }
-        if (!data.count) {
+        if (!data.videoIds.length) {
             this.showAlert("danger", "The source channel has no videos to move.");
             return;
         }
 
         this.pendingMove = { targetId, videoIds: data.videoIds };
-        this.dialogCount.textContent = data.count;
+        this.dialogCount.textContent = `${data.videoIds.length}`;
         this.dialog.show();
     }
 
@@ -112,7 +125,7 @@ class BulkMoveForm extends HTMLElement {
             const videoId = videoIds[i];
             this.progressLabel.textContent = `Moving ${i + 1} of ${total}…`;
             try {
-                const { ok, data } = await postJson("/api/move-video", { videoId, channelId: targetId });
+                const { ok, data } = await postJson<MoveResult>("/api/move-video", { videoId, channelId: targetId } satisfies MoveQuery);
                 if (ok) {
                     moved++;
                 } else if (data.error === "ALREADY_IN_CHANNEL") {
@@ -138,7 +151,7 @@ class BulkMoveForm extends HTMLElement {
         );
 
         if (failed === 0) {
-            this.sourceSelect.setAttribute('value', null);
+            this.sourceSelect.setAttribute('value', null as any);
         }
     }
 }

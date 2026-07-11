@@ -1,3 +1,4 @@
+import indexHtml from '../public/index.html';
 import { config } from "./config.ts";
 import {
     handleChannelNameMismatch,
@@ -7,7 +8,6 @@ import {
     handleFixMediaUrlMismatch,
     handleMediaUrlMismatch,
 } from './http/routes.doctor.ts';
-import { serveStatic } from "./http/routes.static.ts";
 import {
     handleGetChannel,
     handleGetChannelVideos,
@@ -70,7 +70,7 @@ const server = Bun.serve({
             { error: "NOT_FOUND", message: "Unknown API route" },
             404
         ),
-        "/*": async (req) => serveStatic(new URL(req.url).pathname),
+        "/": indexHtml,
     },
 });
 

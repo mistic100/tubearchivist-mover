@@ -1,15 +1,14 @@
 {
   "compilerOptions": {
-    "lib": ["ESNext"],
+    "lib": ["DOM"],
     "target": "ESNext",
     "module": "ESNext",
-    "moduleResolution": "bundler",
-    "moduleDetection": "force",
     "noEmit": true,
     "strict": true,
+    "strictPropertyInitialization": false,
     "skipLibCheck": true,
     "allowImportingTsExtensions": true,
-    "types": ["bun"]
+    "types": ["dom"]
   },
-  "include": ["server/**/*"]
+  "include": ["scripts/**/*"]
 }

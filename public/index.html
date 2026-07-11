@@ -7,7 +7,7 @@
     <title>TubeArchivist Mover</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.20.1/cdn/themes/light.css" />
     <script type="module" src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.20.1/cdn/shoelace-autoloader.js"></script>
-    <link rel="stylesheet" href="/styles.css" />
+    <link rel="stylesheet" href="./styles.css" />
 </head>
 
 <body>
@@ -27,7 +27,7 @@
 
             <sl-tab-panel name="single"><move-form></move-form></sl-tab-panel>
             <sl-tab-panel name="bulk"><bulk-move-form></bulk-move-form></sl-tab-panel>
-            <sl-tab-panel name="import"><manual-import-form></manual-import-form></sl-tab-panel>
+            <sl-tab-panel name="import"><import-form></import-form></sl-tab-panel>
             <sl-tab-panel name="rename"><rename-channel-form></rename-channel-form></sl-tab-panel>
             <sl-tab-panel name="doctor"><ta-doctor></ta-doctor></sl-tab-panel>
         </sl-tab-group>
@@ -38,7 +38,7 @@
             <a href="https://github.com/mistic100/tubearchivist-mover">TubeArchivist Mover</a> - mistic100
         </footer>
     </main>
-    <script type="module" src="/scripts/app.js"></script>
+    <script type="module" src="./scripts/app.ts"></script>
 </body>
 
 </html>

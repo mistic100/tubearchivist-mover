@@ -1,13 +1,9 @@
+import { ChannelDoc } from '../../types/ChannelDoc';
 import { count, get, search, update } from "./client.ts";
 import { VIDEO_INDEX } from './video.ts';
 
 const CHANNEL_INDEX = "ta_channel";
 
-export interface ChannelDoc {
-    channel_id: string;
-    channel_name: string;
-    [K: string]: any;
-}
 
 export async function getAllChannels(): Promise<ChannelDoc[]> {
     return (await search<ChannelDoc>(CHANNEL_INDEX, {

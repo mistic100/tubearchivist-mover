@@ -1,38 +1,28 @@
-import { createAlert, extractId, fetchJson, postJson } from "./utils.js";
-import { loadChannels } from "./common.js";
+import { SlButton, SlSelect } from '@shoelace-style/shoelace';
+import { ImportQuery } from '../../types/ImportQuery';
+import { VideoDoc } from '../../types/VideoDoc';
+import { loadChannels } from "./common.ts";
+import { createAlert, fetchJson, postJson } from "./utils.ts";
 
-const generateRandomString = (length) => {
-  const characters =
-    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-';
-  const charactersLength = characters.length;
-  let result = '';
+class ImportItem extends HTMLElement {
+    private form: HTMLFormElement;
+    private submitBtn: SlButton;
+    private channelSelect: SlSelect;
+    private alertSlot: HTMLElement;
 
-  // Create an array of 32-bit unsigned integers
-  const randomValues = new Uint32Array(length);
-  
-  // Generate random values
-  window.crypto.getRandomValues(randomValues);
-  randomValues.forEach((value) => {
-    result += characters.charAt(value % charactersLength);
-  });
-  return result;
-};
-
-class ManualImportItem extends HTMLElement {
     video = '';
 
     connectedCallback() {
         this.render();
-        this.details = this.querySelector('sl-details');
-        this.form = this.querySelector('form');
-        this.submitBtn = this.querySelector('sl-button[type="submit"]');
-        this.channelSelect = this.form.querySelector('sl-select[name=channel]');
-        this.alertSlot = this.querySelector("#alert-slot");
+        this.form = this.querySelector('form')!;
+        this.submitBtn = this.querySelector('sl-button[type="submit"]')!;
+        this.channelSelect = this.form.querySelector('sl-select[name=channel]')!;
+        this.alertSlot = this.querySelector("#alert-slot")!;
 
         this.form.addEventListener('submit', (e) => this.onSubmit(e));
 
-        this.form.querySelector('sl-input[name=title]').setAttribute('value', this.video.replace(/\.[^.]+$/, ''));
-        loadChannels(this.form.querySelector('sl-select[name=channel]'));
+        this.form.querySelector('sl-input[name=title]')!.setAttribute('value', this.video.replace(/\.[^.]+$/, ''));
+        loadChannels(this.channelSelect);
     }
 
     render() {
@@ -69,19 +59,19 @@ class ManualImportItem extends HTMLElement {
         </sl-details>
         `;
     }
-    
-    showAlert(variant, message) {
+
+    showAlert(variant: "danger" | "success", message: string) {
         this.alertSlot.replaceChildren(createAlert(variant, message));
     }
 
-    async onSubmit(e)  {
+    async onSubmit(e: Event) {
         e.preventDefault();
 
         const formData = new FormData(this.form);
-        const title = formData.get('title').trim();
-        const channel = formData.get('channel');
-        const published = formData.get('published');
-        const category = formData.get('category');
+        const title = (formData.get('title') as string).trim();
+        const channel = formData.get('channel') as string;
+        const published = formData.get('published') as string;
+        const category = formData.get('category') as string;
 
         if (!title || !channel || !published || !category) {
             this.showAlert("danger", "All fields are required.");
@@ -90,41 +80,41 @@ class ManualImportItem extends HTMLElement {
 
         this.submitBtn.loading = true;
 
-        try {
-            const { ok, data } = await postJson("/api/import", {
-                video: this.video,
-                title,
-                channel,
-                published,
-                category,
-            });
+        const { ok, data } = await postJson<VideoDoc & { url: string }>("/api/import", {
+            video: this.video,
+            title,
+            channel,
+            published,
+            category,
+        } satisfies ImportQuery);
 
-            if (ok) {
-                this.showAlert(
-                    "success",
-                    `Video imported: <a href="${data.url}">${data.title}</a>`
-                );
-                this.form.remove();
-            }   else {
-                this.showAlert("danger", data.message);
-            }
-        } catch (err) {
-            this.showAlert("danger", `Request failed: ${err.message}`);
-        } finally {
-            this.submitBtn.loading = false;
+        if (ok) {
+            this.showAlert(
+                "success",
+                `Video imported: <a href="${data.url}">${data.title}</a>`
+            );
+            this.form.remove();
+        } else {
+            this.showAlert("danger", data.message);
         }
+
+        this.submitBtn.loading = false;
     }
 
 }
 
-customElements.define("manual-import-item", ManualImportItem);
+customElements.define("import-item", ImportItem);
 
-class ManualImportForm extends HTMLElement {
+class ImportForm extends HTMLElement {
+    private alertSlot: HTMLElement;
+    private scanButton: SlButton;
+    private content: HTMLElement;
+
     connectedCallback() {
         this.render();
-        this.alertSlot = this.querySelector("#alert-slot");
-        this.scanButton = this.querySelector('sl-button[type="submit"]');
-        this.content = this.querySelector("#content");
+        this.alertSlot = this.querySelector("#alert-slot")!;
+        this.scanButton = this.querySelector('sl-button')!;
+        this.content = this.querySelector("#content")!;
 
         this.scanButton.addEventListener("click", () => this.scan());
     }
@@ -136,34 +126,36 @@ class ManualImportForm extends HTMLElement {
             Add mp4, mkv, webm files in the <code>import</code> directory of your data folder then click "Scan".
         </sl-alert>
         <div id="alert-slot"></div>
-        <sl-button type="submit" variant="primary">Scan</sl-button>
+        <sl-button type="button" variant="primary">Scan</sl-button>
         <div id="content" style="margin-top:1rem;"></div>
         `;
     }
 
-    showAlert(variant, message) {
+    showAlert(variant: "danger" | "success", message: string) {
         this.alertSlot.replaceChildren(createAlert(variant, message));
     }
 
     async scan() {
         this.content.replaceChildren();
+        this.scanButton.loading = true;
 
-        const { ok, data } = await fetchJson(`/api/imports`);
+        const { ok, data } = await fetchJson<{ videos: string[] }>(`/api/imports`);
         if (!ok) {
             this.showAlert("danger", data.message);
-            return;
+        } else {
+            if (!data.videos.length) {
+                this.showAlert("success", 'No videos found in "import" folder');
+            }
+
+            for (const video of data.videos) {
+                const itemElt = document.createElement('import-item') as ImportItem;
+                itemElt.video = video;
+                this.content.appendChild(itemElt);
+            }
         }
 
-        if (!data.videos.length) {
-            this.showAlert("success", 'No videos found in "import" folder');
-        }
-
-        for (const video of data.videos) {
-            const itemElt = document.createElement('manual-import-item');
-            itemElt.video = video;
-            this.content.appendChild(itemElt);
-        }
+        this.scanButton.loading = false;
     }
 }
 
-customElements.define("manual-import-form", ManualImportForm);
+customElements.define("import-form", ImportForm);

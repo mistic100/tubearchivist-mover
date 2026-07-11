@@ -7,10 +7,11 @@
   "license": "MIT",
   "author": "mistic100",
   "scripts": {
-    "dev": "bun --env-file=.env --watch src/server.ts",
-    "start": "bun --env-file=.env src/server.ts"
+    "dev": "bun --env-file=.env --watch server/index.ts",
+    "start": "bun --env-file=.env server/index.ts"
   },
   "devDependencies": {
+    "@shoelace-style/shoelace": "^2.20.1",
     "@types/bun": "latest"
   }
 }
