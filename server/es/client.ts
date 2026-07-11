@@ -39,6 +39,15 @@ async function esFetch<T>(url: string, method: "GET" | "POST", body?: Record<str
     return (await res.json()) as T;
 }
 
+export async function esHealth(): Promise<boolean> {
+    try {
+        await esFetch('_health_report', 'GET');
+        return true;
+    } catch {
+        return false;
+    }
+}
+
 /**
  * Count the number of documents matching the query.
  */

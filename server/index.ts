@@ -13,6 +13,7 @@ import {
     handleGetChannelVideos,
     handleGetImports,
     handleGetVideo,
+    handleHealth,
     handleImport,
     handleListChannels,
     handleMoveVideo,
@@ -22,54 +23,25 @@ import {
 const server = Bun.serve({
     port: config.port,
     routes: {
-        "/api/video/:id": {
-            GET: async (req) => handleGetVideo(req),
-        },
-        "/api/channels": {
-            GET: async (req) => handleListChannels(req),
-        },
-        "/api/channel/:id": {
-            GET: async (req) => handleGetChannel(req),
-        },
-        "/api/channel/:id/videos": {
-            GET: async (req) => handleGetChannelVideos(req),
-        },
-        "/api/imports": {
-            GET: async (req) => handleGetImports(req),
-        },
-        "/api/import": {
-            POST: async (req) => handleImport(req),
-        },
-        "/api/move-video": {
-            POST: async (req) => handleMoveVideo(req),
-        },
-        "/api/rename-channel": {
-            POST: async (req) => handleRenameChannel(req),
-        },
+        "/api/health": handleHealth,
 
-        "/api/doctor/media-url-mismatch": {
-            GET: async (req) => handleMediaUrlMismatch(req),
-        },
-        "/api/doctor/media-url-mismatch/fix/:id": {
-            POST: async (req) => handleFixMediaUrlMismatch(req),
-        },
-        "/api/doctor/channel-name-mismatch": {
-            GET: async (req) => handleChannelNameMismatch(req),
-        },
-        "/api/doctor/channel-name-mismatch/fix/:id": {
-            POST: async (req) => handleFixChannelNameMismatch(req),
-        },
-        "/api/doctor/empty-channel": {
-            GET: async (req) => handleEmptyChannel(req),
-        },
-        "/api/doctor/empty-channel/fix/:id": {
-            POST: async (req) => handleFixEmptyChannel(req),
-        },
+        "/api/video/:id": handleGetVideo,
+        "/api/channels": handleListChannels,
+        "/api/channel/:id": handleGetChannel,
+        "/api/channel/:id/videos": handleGetChannelVideos,
+        "/api/imports": handleGetImports,
+        "/api/import": { POST: handleImport },
+        "/api/move-video": { POST: handleMoveVideo },
+        "/api/rename-channel": { POST: handleRenameChannel },
 
-        "/api/*": Response.json(
-            { error: "NOT_FOUND", message: "Unknown API route" },
-            404
-        ),
+        "/api/doctor/media-url-mismatch": handleMediaUrlMismatch,
+        "/api/doctor/media-url-mismatch/fix/:id": { POST: handleFixMediaUrlMismatch },
+        "/api/doctor/channel-name-mismatch": handleChannelNameMismatch,
+        "/api/doctor/channel-name-mismatch/fix/:id": { POST: handleFixChannelNameMismatch },
+        "/api/doctor/empty-channel": handleEmptyChannel,
+        "/api/doctor/empty-channel/fix/:id": { POST: handleFixEmptyChannel },
+
+        "/api/*": Response.json({ error: "NOT_FOUND", message: "Unknown API route" }, 404),
         "/": indexHtml,
     },
 });

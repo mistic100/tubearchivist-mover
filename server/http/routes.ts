@@ -1,12 +1,27 @@
 import { BunRequest } from 'bun';
+import fs from 'node:fs';
+import { access } from 'node:fs/promises';
 import { ChannelRenameQuery } from '../../types/ChannelRenameQuery';
+import { HealthResult } from '../../types/HealthResult';
 import { ImportQuery } from '../../types/ImportQuery';
 import { MoveQuery } from '../../types/MoveQuery';
+import { config } from '../config.ts';
 import { getAllChannels, getChannel } from "../es/channel.ts";
+import { esHealth } from '../es/client.ts';
 import { getVideo, listChannelVideoIds } from "../es/video.ts";
 import { ImportError, importVideo, listImportFiles } from '../services/importVideo.ts';
 import { MoveError, moveVideo } from "../services/moveVideo.ts";
 import { renameChannel, RenameError } from '../services/renameChannel.ts';
+import { taHealth } from '../ta/client.ts';
+
+export async function handleHealth() {
+    return Response.json({
+        es: await esHealth(),
+        ta: await taHealth(),
+        data: await access(config.dataDir, fs.constants.W_OK).then(() => true).catch(() => false),
+        cache: await access(config.cacheDir, fs.constants.W_OK).then(() => true).catch(() => false),
+    } satisfies HealthResult);
+}
 
 export async function handleGetVideo(req: BunRequest<":id">) {
     const video = await getVideo(req.params.id);
@@ -29,7 +44,7 @@ export async function handleGetChannelVideos(req: BunRequest<":id">) {
     });
 }
 
-export async function handleListChannels(req: Request) {
+export async function handleListChannels() {
     const channels = await getAllChannels();
 
     return Response.json({ channels });
@@ -75,7 +90,7 @@ export async function handleRenameChannel(req: Request) {
     }
 }
 
-export async function handleGetImports(req: Request) {
+export async function handleGetImports() {
     const videos = await listImportFiles();
     return Response.json({ videos });
 }

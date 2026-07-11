@@ -34,3 +34,13 @@ export async function taFetch<T>(url: string, method: "GET" | "POST" | "DELETE",
 
     return (await res.json()) as T;
 }
+
+export async function taHealth(): Promise<boolean> {
+    try {
+        await taFetch('appsettings/token', 'GET');
+        return true;
+    
+    } catch {
+        return false;
+    }
+}

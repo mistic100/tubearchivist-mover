@@ -1,3 +1,4 @@
+import "./status-badges.ts";
 import "./move-form.ts";
 import "./bulk-move-form.ts";
 import "./rename-channel-form.ts";
