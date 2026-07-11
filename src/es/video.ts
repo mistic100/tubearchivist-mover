@@ -1,5 +1,5 @@
 import { ChannelDoc, getAllChannels } from './channel.ts';
-import { get, search, update, updateByQuery } from "./client.ts";
+import { create, get, search, update, updateByQuery } from "./client.ts";
 
 export const VIDEO_INDEX = "ta_video";
 
@@ -9,12 +9,41 @@ export interface Subtitle {
 }
 
 export interface VideoDoc {
-    youtube_id: string;
+    active: boolean;
+    category: string[];
+    date_downloaded: number;
+    published: number;
+    tags: string[];
     title: string;
-    media_url: string;
+    vid_last_refresh: number;
+    vid_thumb_url: string;
+    vid_type: "videos" | "streams";
+    youtube_id: string;
+    description: string;
     channel: ChannelDoc;
+    stats: {
+        view_count: number;
+        like_count: number;
+        dislike_count: number;
+        average_rating: number;
+    };
+    media_url: string;
+    player: {
+        duration: number;
+        duration_str: string;
+        watched: boolean;
+        watched_date?: number;
+    };
+    streams: Array<{
+        index: number;
+        bitrate: number;
+        codec: string;
+        type: string;
+        width?: number;
+        height?: number;
+    }>;
+    media_size: number;
     subtitles?: Subtitle[];
-    [K: string]: any;
 }
 
 export async function getVideo(id: string): Promise<VideoDoc | null> {
@@ -34,7 +63,14 @@ export async function updateVideo(
     id: string,
     partial: Partial<VideoDoc>,
 ): Promise<void> {
-    await update(VIDEO_INDEX, id, partial as unknown as Record<string, unknown>);
+    await update(VIDEO_INDEX, id, partial);
+}
+
+export async function createVideo(
+    id: string,
+    video: VideoDoc,
+): Promise<void> {
+    await create(VIDEO_INDEX, id, video as any);
 }
 
 /**

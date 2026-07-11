@@ -18,3 +18,12 @@ main {
 sl-alert {
     margin-bottom: 1.5rem;
 }
+
+a {
+    color: var(--sl-color-primary-600);
+}
+
+footer {
+    color: var(--sl-input-help-text-color);
+    text-align: center;
+}

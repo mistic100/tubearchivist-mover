@@ -1,37 +1,31 @@
 # TubeArchivist Mover
 
-A small application that moves [TubeArchivist](https://www.tubearchivist.com/) videos from one channel to another, updating Elasticsearch index and filesystem.
+A collection of tools to move, rename, import videos in your [TubeArchivist](https://www.tubearchivist.com/) instance.
 
-![](./screenshot.png)
+> [!CAUTION]
+> This tool moves files and edits your TubeArchivist index directly.
+> Use at your own risk and always have backups.
 
-> **Heads up:** this tool moves files and edits your TubeArchivist index
-> directly. Test against a small video first and make sure you have backups.
->
+> [!IMPORTANT]
 > It is strongly recommended to disable the "Refresh Metadata" schedule in TA.
 
+![](./screenshot.png)
 
 ## Features
 
 - Move a single video to another channel
-- Move all videos of a channel to another
+- Move all videos from a channel to another
+- Manually import additional videos
 - Rename a channel
-- Itegrity checks
-
-### Move operation
-
-For a given video id and target channel id it:
-
-1. Looks up the video (`ta_video`) and target channel (`ta_channel`) in Elasticsearch.
-2. Renames `DATA_DIR/<oldChannelId>/<videoId>.mp4` → `DATA_DIR/<newChannelId>/<videoId>.mp4`.
-3. Renames any subtitle `.vtt` files alongside it.
-4. Updates the video document in Elasticsearch.
+- Integrity checks
 
 ## Environment variables
 
 | Variable           | Required | Default     | Description                         |
 | ------------------ | -------- | ----------- | ----------------------------------- |
 | `PORT`             | no       | `9000`      | HTTP port the server listens on.    |
-| `DATA_DIR`         | no       | `/youtube`  | Root of the shared TA media volume. |
+| `DATA_DIR`         | no       | `/youtube`  | Root of the TA media volume.        |
+| `CACHE_DIR`        | no       | `/cache`    | Root of the TA cache volume.        |
 | `TA_HOST`          | **yes**  |             | HTTP host of TubeArchivist.         |
 | `API_TOKEN`        | **yes**  |             | API token of TubeArchivist.         |
 | `ES_URL`           | **yes**  | —           | Base URL of Elasticsearch.          |
@@ -70,6 +64,7 @@ docker run -d \
   -e ES_URL=http://tubearchivist-es:9200 \
   -e ELASTIC_PASSWORD=verysecret \
   -v tubearchivist_media:/youtube \
+  -v tubearchivist_cache:/cache \
   tubearchivist-mover
 ```
 
@@ -97,16 +92,11 @@ services:
       - '9000:9000'
     volumes:
       - media:/youtube
+      - cache:/cache
     depends_on:
       tubearchivist-es:
         condition: service_healthy
 ```
-
-## URL / id behaviour
-
-All inputs accept either a bare id or a URL/path — the UI keeps only the segment
-after the last `/`. So `UCabc123` and `http://tubearchivist.local/channel/UCabc123`
-all resolve to `UCabc123`.
 
 ## Security note
 
@@ -115,4 +105,4 @@ alongside your TubeArchivist stack. Do not expose it to the public internet.
 
 ## AI Disclaimer
 
-This application has been mostly generated with Claude Opus 4.8 with carefull review by a human.
+This application has been bootstraped with Claude Opus 4.8 with carefull review by a human.

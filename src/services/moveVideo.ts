@@ -4,8 +4,6 @@ import { config } from "../config.ts";
 import { getChannel } from "../es/channel.ts";
 import { getVideo, updateVideo, type Subtitle } from "../es/video.ts";
 
-const ID_PATTERN = /^[A-Za-z0-9_-]+$/;
-
 type MoveErrorCode =
     | "INVALID_INPUT"
     | "VIDEO_NOT_FOUND"
@@ -52,29 +50,37 @@ interface FileRename {
 }
 
 export async function moveVideo(videoId: string, channelId: string): Promise<MoveResult> {
-    if (!ID_PATTERN.test(videoId)) {
-        throw new MoveError("INVALID_INPUT", `Invalid video id: "${videoId}"`);
-    }
-    if (!ID_PATTERN.test(channelId)) {
-        throw new MoveError("INVALID_INPUT", `Invalid channel id: "${channelId}"`);
+    console.log('Move video', { videoId, channelId });
+
+    if (!videoId || !channelId) {
+        throw new MoveError(
+            "INVALID_INPUT",
+            `Incomplete request`
+        );
     }
 
     const video = await getVideo(videoId);
     if (!video) {
-        throw new MoveError("VIDEO_NOT_FOUND", `Video "${videoId}" not found`);
+        throw new MoveError(
+            "VIDEO_NOT_FOUND",
+            `Video "${videoId}" not found`
+        );
     }
 
     const oldChannelId = video.channel.channel_id;
     if (oldChannelId === channelId) {
         throw new MoveError(
             "ALREADY_IN_CHANNEL",
-            `Video "${videoId}" is already in channel "${channelId}"`,
+            `Video "${videoId}" is already in channel "${channelId}"`
         );
     }
 
     const channel = await getChannel(channelId);
     if (!channel) {
-        throw new MoveError("CHANNEL_NOT_FOUND", `Channel "${channelId}" not found`);
+        throw new MoveError(
+            "CHANNEL_NOT_FOUND",
+            `Channel "${channelId}" not found`
+        );
     }
 
     const renames: FileRename[] = [];
@@ -104,9 +110,10 @@ export async function moveVideo(videoId: string, channelId: string): Promise<Mov
             if (!(await Bun.file(r.from).exists())) {
                 throw new MoveError(
                     "SOURCE_MISSING",
-                    `Source file not found: ${sourceMp4}`,
+                    `Source file not found: ${r.from}`
                 );
             }
+            console.log(`Move "${r.from}" to "${r.to}"`);
             await mkdir(dirname(r.to), { recursive: true });
             await rename(r.from, r.to);
             completed.push(r);
@@ -131,8 +138,7 @@ export async function moveVideo(videoId: string, channelId: string): Promise<Mov
         } else {
             throw new MoveError(
                 "MOVE_FAILED",
-                `Move failed and files were rolled back: ${err instanceof Error ? err.message : String(err)
-                }`,
+                `Move failed and files were rolled back: ${err instanceof Error ? err.message : String(err)}`,
             );
         }
     }

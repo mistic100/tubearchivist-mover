@@ -69,7 +69,7 @@ class MoveForm extends HTMLElement {
                 "success",
                 `Moved ${data.videoId} to ${data.toChannelId} (${data.movedFiles} file(s)).`,
             );
-            this.videoInput.setAttribute('value', null);
+            this.videoInput.setAttribute('value', '');
             this.setPreview(this.videoInput, "");
         } else {
             this.showAlert("danger", data.message);

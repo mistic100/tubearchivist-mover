@@ -21,16 +21,24 @@
         <sl-tab-group placement="start">
             <sl-tab slot="nav" panel="single">Move a single video</sl-tab>
             <sl-tab slot="nav" panel="bulk">Move an entire channel</sl-tab>
+            <sl-tab slot="nav" panel="import">Manual import</sl-tab>
             <sl-tab slot="nav" panel="rename">Rename a channel</sl-tab>
             <sl-tab slot="nav" panel="doctor">Doctor</sl-tab>
 
             <sl-tab-panel name="single"><move-form></move-form></sl-tab-panel>
             <sl-tab-panel name="bulk"><bulk-move-form></bulk-move-form></sl-tab-panel>
+            <sl-tab-panel name="import"><manual-import-form></manual-import-form></sl-tab-panel>
             <sl-tab-panel name="rename"><rename-channel-form></rename-channel-form></sl-tab-panel>
             <sl-tab-panel name="doctor"><ta-doctor></ta-doctor></sl-tab-panel>
         </sl-tab-group>
+        
+        <sl-divider></sl-divider>
+
+        <footer>
+            <a href="https://github.com/mistic100/tubearchivist-mover">TubeArchivist Mover</a> - mistic100
+        </footer>
     </main>
-    <script type="module" src="/app.js"></script>
+    <script type="module" src="/scripts/app.js"></script>
 </body>
 
 </html>

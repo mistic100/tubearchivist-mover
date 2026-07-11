@@ -11,7 +11,10 @@ import { serveStatic } from "./http/routes.static.ts";
 import {
     handleGetChannel,
     handleGetChannelVideos,
+    handleGetImports,
     handleGetVideo,
+    handleImport,
+    handleListChannels,
     handleMoveVideo,
     handleRenameChannel,
 } from "./http/routes.ts";
@@ -22,11 +25,20 @@ const server = Bun.serve({
         "/api/video/:id": {
             GET: async (req) => handleGetVideo(req),
         },
+        "/api/channels": {
+            GET: async (req) => handleListChannels(req),
+        },
         "/api/channel/:id": {
             GET: async (req) => handleGetChannel(req),
         },
         "/api/channel/:id/videos": {
             GET: async (req) => handleGetChannelVideos(req),
+        },
+        "/api/imports": {
+            GET: async (req) => handleGetImports(req),
+        },
+        "/api/import": {
+            POST: async (req) => handleImport(req),
         },
         "/api/move-video": {
             POST: async (req) => handleMoveVideo(req),

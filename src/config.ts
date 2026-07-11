@@ -1,6 +1,7 @@
 export interface Config {
     port: number;
     dataDir: string;
+    cacheDir: string;
     taHost: string;
     apiToken: string;
     esUrl: string;
@@ -24,6 +25,7 @@ function optional(name: string, fallback: string): string {
 export const config: Config = {
     port: Number.parseInt(optional("PORT", "9000"), 10),
     dataDir: optional("DATA_DIR", "/youtube"),
+    cacheDir: optional("CACHE_DIR", "/cache"),
     taHost: required("TA_HOST"),
     apiToken: required("API_TOKEN"),
     esUrl: required("ES_URL"),

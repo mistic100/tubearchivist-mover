@@ -1,6 +1,6 @@
 import { join, normalize, sep } from "node:path";
 
-const PUBLIC_DIR = join(import.meta.dir, "../public");
+const PUBLIC_DIR = join(import.meta.dir, "../../public");
 
 const CONTENT_TYPES: Record<string, string> = {
     ".html": "text/html; charset=utf-8",

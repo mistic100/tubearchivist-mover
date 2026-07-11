@@ -4,7 +4,6 @@ import { loadChannels } from "./common.js";
 class RenameChannelForm extends HTMLElement {
     connectedCallback() {
         this.render();
-        this.channelSelect = this.querySelector('[name="channel"]');
         this.form = this.querySelector("form");
         this.submitBtn = this.querySelector('sl-button[type="submit"]');
         this.alertSlot = this.querySelector("#alert-slot");
@@ -48,10 +47,9 @@ class RenameChannelForm extends HTMLElement {
             if (ok) {
                 this.showAlert(
                     "success",
-                    `Renamed channel to "${data.channel_name}" (${data.updatedVideos} video(s) updated).`,
+                    `Renamed channel to "${newName}" (${data.updatedVideos} video(s) updated).`,
                 );
-                this.channelSelect.setAttribute('value', null);
-                this.nameInput.setAttribute('value', null);
+                this.form.reset();
             } else {
                 this.showAlert("danger", data.message);
             }

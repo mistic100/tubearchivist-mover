@@ -20,10 +20,10 @@ export async function getChannel(id: string): Promise<ChannelDoc | null> {
 }
 
 /**
- * Update the channel_name on the channel document in the ta_channel index.
+ * Update the channel.
  */
-export async function updateChannelName(id: string, newName: string): Promise<void> {
-    await update(CHANNEL_INDEX, id, { channel_name: newName });
+export async function updateChannel(id: string, partial: Partial<ChannelDoc>): Promise<void> {
+    await update(CHANNEL_INDEX, id, partial);
 }
 
 /**

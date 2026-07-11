@@ -1,7 +1,9 @@
 import { BunRequest } from 'bun';
-import { getChannel, updateChannelName } from "../es/channel.ts";
-import { getVideo, listChannelVideoIds, updateChannelNameOnVideos } from "../es/video.ts";
+import { getAllChannels, getChannel } from "../es/channel.ts";
+import { getVideo, listChannelVideoIds } from "../es/video.ts";
+import { ImportData, ImportError, importVideo, listImportFiles } from '../services/importVideo.ts';
 import { MoveError, moveVideo } from "../services/moveVideo.ts";
+import { renameChannel, RenameError } from '../services/renameChannel.ts';
 
 export async function handleGetVideo(req: BunRequest<":id">) {
     const video = await getVideo(req.params.id);
@@ -31,6 +33,12 @@ export async function handleGetChannelVideos(req: BunRequest<":id">) {
     });
 }
 
+export async function handleListChannels(req: Request) {
+    const channels = await getAllChannels();
+
+    return Response.json({ channels });
+}
+
 export async function handleGetChannel(req: BunRequest<":id">) {
     const channel = await getChannel(req.params.id);
     if (!channel) {
@@ -44,43 +52,48 @@ export async function handleGetChannel(req: BunRequest<":id">) {
 }
 
 export async function handleMoveVideo(req: Request) {
-    const payload = await req.json() as { videoId?: string; channelId?: string };
-    const videoId = typeof payload.videoId === "string" ? payload.videoId : "";
-    const channelId = typeof payload.channelId === "string" ? payload.channelId : "";
-    if (!videoId || !channelId) {
-        return Response.json({ error: "INVALID_INPUT", message: "videoId and channelId are required" }, 400);
-    }
+    const payload = await req.json() as { videoId: string; channelId: string };
 
     try {
-        const result = await moveVideo(videoId, channelId);
-        return Response.json({ ok: true, ...result });
+        const result = await moveVideo(payload.videoId, payload.channelId);
+        return Response.json(result);
     } catch (err) {
         if (err instanceof MoveError) {
             return err.toResponse();
-        };
+        }
         throw err;
     }
 }
 
 export async function handleRenameChannel(req: Request) {
-    const payload = await req.json() as { channelId?: unknown; newName?: unknown };
-    const channelId = typeof payload.channelId === "string" ? payload.channelId : "";
-    const newName = typeof payload.newName === "string" ? payload.newName.trim() : "";
-    if (!channelId || !newName) {
-        return Response.json({ error: "INVALID_INPUT", message: "channelId and newName are required" }, 400);
-    }
+    const payload = await req.json() as  { channelId: string; newName: string };
 
-    const channel = await getChannel(channelId);
-    if (!channel) {
-        return Response.json({ error: "CHANNEL_NOT_FOUND", message: "Channel not found" }, 404);
+    try {
+        const result = await renameChannel(payload.channelId, payload.newName);
+        return Response.json(result);
+    } catch (err) {
+        if (err instanceof RenameError) {
+            return err.toResponse();
+        }
+        throw err;
     }
+}
 
-    await updateChannelName(channelId, newName);
-    const updatedVideos = await updateChannelNameOnVideos(channelId, newName);
-    return Response.json({
-        ok: true,
-        channel_id: channelId,
-        channel_name: newName,
-        updatedVideos,
-    });
+export async function handleGetImports(req: Request) {
+    const videos = await listImportFiles();
+    return Response.json({ videos });
+}
+
+export async function handleImport(req: Request) {
+    const payload = await req.json() as ImportData;
+
+    try {
+        const result = await importVideo(payload);
+        return Response.json(result);
+    } catch (err) {
+        if (err instanceof ImportError) {
+            return err.toResponse();
+        }
+        throw err;
+    }
 }

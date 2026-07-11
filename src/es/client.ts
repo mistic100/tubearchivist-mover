@@ -70,6 +70,13 @@ export async function update(index: string, id: string, doc: Record<string, unkn
 }
 
 /**
+ * Create a document.
+ */
+export async function create(index: string, id: string, doc: Record<string, unknown>): Promise<void> {
+    await esFetch(`${index}/_doc/${encodeURIComponent(id)}?refresh=true`, "POST", doc);
+}
+
+/**
  * Run a search query and return the raw hits. Caller supplies the index and
  * request body (query, _source, size, ...).
  */
