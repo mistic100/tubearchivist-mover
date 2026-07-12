@@ -6,7 +6,9 @@ let allChannels: Promise<ChannelDoc[]>;
 
 export async function loadChannels(select: SlSelect) {
     if (!allChannels) {
-        allChannels = fetchJson<{ channels: ChannelDoc[] }>('/api/channels').then(res => res.data.channels);
+        allChannels = fetchJson<{ channels: ChannelDoc[] }>('/api/channels')
+            .then(({ ok, data }) => ok ? data.channels : [])
+            .then(channels => channels.sort((a, b) => a.channel_name.localeCompare(b.channel_name)));
     }
 
     for (const channel of await allChannels) {
