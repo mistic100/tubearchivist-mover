@@ -94,7 +94,7 @@ export async function importVideo(payload: ImportQuery): Promise<VideoDoc & { ur
 
     const probe = await getFFprobeData(sourceFile);
 
-    const newId = 'cust-' + generateRandomString(6);
+    const newId = 'tam-' + generateRandomString(7);
     const now = Math.round(new Date().getTime() / 1000);
     const duration = Math.round(parseFloat(probe.format.duration));
     const published = Math.round(Date.parse(`${payload.published}`) / 1000);
@@ -161,7 +161,7 @@ export async function importVideo(payload: ImportQuery): Promise<VideoDoc & { ur
 }
 
 function generateRandomString(length: number): string {
-    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-';
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_';
 
     const randomValues = new Uint32Array(length);
     crypto.getRandomValues(randomValues);
