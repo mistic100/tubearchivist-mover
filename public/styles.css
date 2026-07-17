@@ -3,6 +3,10 @@
     font-family: var(--sl-font-sans);
 }
 
+:not(:defined) {
+  visibility: hidden;
+}
+
 body {
     margin: 0;
     background: #f4f5f7;
