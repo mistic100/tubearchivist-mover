@@ -45,13 +45,7 @@ Then open <http://localhost:9000>.
 
 ## Running with Docker
 
-Build:
-
-```sh
-docker build -t tubearchivist-mover .
-```
-
-Run, sharing TubeArchivist's media volume and joining its network so the
+Run tubearchivist-mover, sharing TubeArchivist's volumes and joining its network so the
 container can reach Elasticsearch by service name:
 
 ```sh
@@ -65,11 +59,10 @@ docker run -d \
   -e ELASTIC_PASSWORD=verysecret \
   -v tubearchivist_media:/youtube \
   -v tubearchivist_cache:/cache \
-  tubearchivist-mover
+  ghcr.io/mistic100/tubearchivist-mover:latest
 ```
 
-Adjust `--network`, the `tubearchivist_media` volume path, and `ES_URL` to match your
-TubeArchivist deployment.
+Adjust the network, volumes names and environment variables to match your TubeArchivist deployment.
 
 ## Add to your compose stack
 
@@ -81,9 +74,8 @@ services:
     ...
 
   tubearchivist-mover:
-    build: ./tubearchivist-mover
+    image: ghcr.io/mistic100/tubearchivist-mover:latest
     container_name: tubearchivist-mover
-    pull_policy: build
     env_file: .env # contains ELASTIC_PASSWORD and API_TOKEN
     environment:
       TA_HOST: http://tubearchist:8000
@@ -103,6 +95,7 @@ services:
 The app ships **no authentication**. It is intended to run on a trusted network
 alongside your TubeArchivist stack. Do not expose it to the public internet.
 
-## AI Disclaimer
+## AI Involvement
 
-This application has been bootstraped with Claude Opus 4.8 with carefull review by a human.
+This application has been bootstraped with Claude Opus 4.8 with carefull review by a human,
+and further addition has been done by me.
