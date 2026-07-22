@@ -1,6 +1,6 @@
-import { ChannelDoc } from '../../types/ChannelDoc';
-import { count, get, search, update } from "./client.ts";
-import { VIDEO_INDEX } from './video.ts';
+import { ChannelDoc } from 'types/ChannelDoc';
+import { count, get, search, update } from './client';
+import { VIDEO_INDEX } from './video';
 
 const CHANNEL_INDEX = "ta_channel";
 

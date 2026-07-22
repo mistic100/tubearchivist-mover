@@ -1,6 +1,6 @@
 import { SlSelect } from '@shoelace-style/shoelace';
-import { ChannelDoc } from "../../types/ChannelDoc";
-import { fetchJson } from "./utils.ts";
+import { ChannelDoc } from 'types/ChannelDoc';
+import { fetchJson } from './utils';
 
 let allChannels: Promise<ChannelDoc[]>;
 

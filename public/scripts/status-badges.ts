@@ -1,5 +1,5 @@
 import { SlBadge } from '@shoelace-style/shoelace';
-import { HealthResult } from '../../types/HealthResult';
+import { HealthResult } from 'types/HealthResult';
 import { fetchJson } from './utils';
 
 class StatusBadge extends HTMLElement {

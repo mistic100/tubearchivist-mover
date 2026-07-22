@@ -1,7 +1,7 @@
-import { ChannelNameMismatchDoc } from '../../types/ChannelNameMismatchDoc';
-import { VideoDoc } from '../../types/VideoDoc';
-import { getAllChannels } from './channel.ts';
-import { create, get, search, update, updateByQuery } from "./client.ts";
+import { ChannelNameMismatchDoc } from 'types/ChannelNameMismatchDoc';
+import { VideoDoc } from 'types/VideoDoc';
+import { getAllChannels } from './channel';
+import { create, get, search, update, updateByQuery } from './client';
 
 export const VIDEO_INDEX = "ta_video";
 

@@ -1,18 +1,18 @@
 import { BunRequest } from 'bun';
 import fs from 'node:fs';
 import { access } from 'node:fs/promises';
-import { ChannelRenameQuery } from '../../types/ChannelRenameQuery';
-import { HealthResult } from '../../types/HealthResult';
-import { ImportQuery } from '../../types/ImportQuery';
-import { MoveQuery } from '../../types/MoveQuery';
+import { ChannelRenameQuery } from 'types/ChannelRenameQuery';
+import { HealthResult } from 'types/HealthResult';
+import { ImportQuery } from 'types/ImportQuery';
+import { MoveQuery } from 'types/MoveQuery';
 import { config } from '../config.ts';
-import { getAllChannels, getChannel } from "../es/channel.ts";
-import { esHealth } from '../es/client.ts';
-import { getVideo, listChannelVideoIds } from "../es/video.ts";
-import { ImportError, importVideo, listImportFiles } from '../services/importVideo.ts';
-import { MoveError, moveVideo } from "../services/moveVideo.ts";
-import { renameChannel, RenameError } from '../services/renameChannel.ts';
-import { taHealth } from '../ta/client.ts';
+import { getAllChannels, getChannel } from '../es/channel';
+import { esHealth } from '../es/client';
+import { getVideo, listChannelVideoIds } from '../es/video';
+import { ImportError, importVideo, listImportFiles } from '../services/importVideo';
+import { MoveError, moveVideo } from '../services/moveVideo';
+import { renameChannel, RenameError } from '../services/renameChannel';
+import { taHealth } from '../ta/client';
 
 export async function handleHealth() {
     return Response.json({

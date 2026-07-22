@@ -8,7 +8,10 @@
     "strictPropertyInitialization": false,
     "skipLibCheck": true,
     "allowImportingTsExtensions": true,
-    "types": ["dom"]
+    "types": ["dom"],
+    "paths": {
+      "types/*": ["../types/*"]
+    }
   },
   "include": ["scripts/**/*"]
 }

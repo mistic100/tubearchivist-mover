@@ -1,9 +1,9 @@
 import { SlButton, SlInput } from '@shoelace-style/shoelace';
-import { MoveQuery } from '../../types/MoveQuery';
-import { MoveResult } from '../../types/MoveResult';
-import { VideoDoc } from '../../types/VideoDoc';
-import { loadChannels } from "./common.js";
-import { createAlert, extractId, fetchJson, postJson } from "./utils.js";
+import { MoveQuery } from 'types/MoveQuery';
+import { MoveResult } from 'types/MoveResult';
+import { VideoDoc } from 'types/VideoDoc';
+import { loadChannels } from './common';
+import { createAlert, extractId, fetchJson, postJson } from './utils';
 
 class MoveForm extends HTMLElement {
     private videoInput: SlInput;

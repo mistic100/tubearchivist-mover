@@ -1,11 +1,11 @@
 import { mkdir, rename } from "node:fs/promises";
 import { dirname, join } from "node:path";
-import { MoveQuery } from '../../types/MoveQuery';
-import { MoveResult } from '../../types/MoveResult';
-import { Subtitle } from '../../types/VideoDoc';
-import { config } from "../config.ts";
-import { getChannel } from "../es/channel.ts";
-import { getVideo, updateVideo } from "../es/video.ts";
+import { MoveQuery } from 'types/MoveQuery';
+import { MoveResult } from 'types/MoveResult';
+import { Subtitle } from 'types/VideoDoc';
+import { config } from '../config';
+import { getChannel } from '../es/channel';
+import { getVideo, updateVideo } from '../es/video';
 
 type MoveErrorCode =
     | "INVALID_INPUT"
@@ -127,7 +127,7 @@ export async function moveVideo(payload: MoveQuery): Promise<MoveResult> {
         for (const r of completed) {
             try {
                 await rename(r.to, r.from);
-            } catch (e) {
+            } catch {
                 console.error(`Rollback failed: could not move ${r.from} -> ${r.to}:`, err);
             }
         }

@@ -1,8 +1,8 @@
 import { SlButton, SlSelect } from '@shoelace-style/shoelace';
-import { ImportQuery } from '../../types/ImportQuery';
-import { VideoDoc } from '../../types/VideoDoc';
-import { loadChannels } from "./common.ts";
-import { createAlert, fetchJson, postJson } from "./utils.ts";
+import { ImportQuery } from 'types/ImportQuery';
+import { VideoDoc } from 'types/VideoDoc';
+import { loadChannels } from './common';
+import { createAlert, fetchJson, postJson } from './utils';
 
 class ImportItem extends HTMLElement {
     private form: HTMLFormElement;

@@ -1,11 +1,11 @@
 import { $ } from "bun";
 import { mkdir, readdir, rename } from "node:fs/promises";
 import { dirname, extname, join } from "node:path";
-import { VideoDoc } from '../../types/VideoDoc';
-import { config } from "../config.ts";
-import { getChannel } from '../es/channel.ts';
-import { createVideo } from '../es/video.ts';
-import { ImportQuery } from '../../types/ImportQuery';
+import { ImportQuery } from 'types/ImportQuery';
+import { VideoDoc } from 'types/VideoDoc';
+import { config } from '../config';
+import { getChannel } from '../es/channel';
+import { createVideo } from '../es/video';
 
 const IMPORT_FOLDER = 'import';
 const ALLOWED_VIDEO_EXTENSIONS = [".mp4", ".mkv", ".webm"];

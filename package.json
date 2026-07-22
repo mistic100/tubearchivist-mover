@@ -11,7 +11,11 @@
     "start": "bun --env-file=.env server/index.ts"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@shoelace-style/shoelace": "^2.20.1",
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "eslint": "^10.7.0",
+    "globals": "^17.7.0",
+    "typescript-eslint": "^8.65.0"
   }
 }

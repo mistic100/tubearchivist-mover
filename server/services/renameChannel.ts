@@ -1,5 +1,5 @@
-import { ChannelRenameQuery } from '../../types/ChannelRenameQuery';
-import { ChannelRenameResult } from '../../types/ChannelRenameResult';
+import { ChannelRenameQuery } from 'types/ChannelRenameQuery';
+import { ChannelRenameResult } from 'types/ChannelRenameResult';
 import { getChannel, updateChannel } from '../es/channel';
 import { updateChannelNameOnVideos } from '../es/video';
 

@@ -1,6 +1,6 @@
-import "./status-badges.ts";
-import "./move-form.ts";
-import "./bulk-move-form.ts";
-import "./rename-channel-form.ts";
-import "./import-form.ts";
-import "./ta-doctor.ts";
+import './status-badges';
+import './move-form';
+import './bulk-move-form';
+import './rename-channel-form';
+import './import-form';
+import './ta-doctor';

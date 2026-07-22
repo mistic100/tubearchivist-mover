@@ -1,5 +1,5 @@
 import indexHtml from '../public/index.html';
-import { config } from "./config.ts";
+import { config } from './config';
 import {
     handleChannelNameMismatch,
     handleEmptyChannel,
@@ -7,7 +7,7 @@ import {
     handleFixEmptyChannel,
     handleFixMediaUrlMismatch,
     handleMediaUrlMismatch,
-} from './http/routes.doctor.ts';
+} from './http/routes.doctor';
 import {
     handleGetChannel,
     handleGetChannelVideos,
@@ -18,7 +18,7 @@ import {
     handleListChannels,
     handleMoveVideo,
     handleRenameChannel,
-} from "./http/routes.ts";
+} from './http/routes';
 
 const server = Bun.serve({
     port: config.port,

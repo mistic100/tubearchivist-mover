@@ -1,8 +1,8 @@
 import { SlSpinner } from '@shoelace-style/shoelace';
-import { ChannelDoc } from '../../types/ChannelDoc';
-import { ChannelNameMismatchDoc } from '../../types/ChannelNameMismatchDoc';
-import { VideoDoc } from '../../types/VideoDoc';
-import { createAlert, fetchJson, postJson } from './utils.ts';
+import { ChannelDoc } from 'types/ChannelDoc';
+import { ChannelNameMismatchDoc } from 'types/ChannelNameMismatchDoc';
+import { VideoDoc } from 'types/VideoDoc';
+import { createAlert, fetchJson, postJson } from './utils';
 
 class TaDoctorItem extends HTMLElement {
     message = '';

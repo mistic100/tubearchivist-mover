@@ -1,4 +1,4 @@
-import { config } from "../config.ts";
+import { config } from '../config';
 
 const authHeader =
     "Basic " +
@@ -26,6 +26,7 @@ async function esFetch<T>(url: string, method: "GET" | "POST", body?: Record<str
                 "Content-Type": "application/json",
             },
             body: body ? JSON.stringify(body) : undefined,
+            signal: AbortSignal.timeout(5000),
         }
     );
 

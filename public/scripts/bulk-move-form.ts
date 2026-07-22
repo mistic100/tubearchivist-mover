@@ -1,9 +1,9 @@
 import { SlButton, SlDialog, SlProgressBar, SlSelect } from '@shoelace-style/shoelace';
-import { ChannelDoc } from '../../types/ChannelDoc';
-import { MoveQuery } from '../../types/MoveQuery';
-import { MoveResult } from '../../types/MoveResult';
-import { loadChannels } from "./common.ts";
-import { createAlert, fetchJson, postJson } from "./utils.ts";
+import { ChannelDoc } from 'types/ChannelDoc';
+import { MoveQuery } from 'types/MoveQuery';
+import { MoveResult } from 'types/MoveResult';
+import { loadChannels } from './common';
+import { createAlert, fetchJson, postJson } from './utils';
 
 class BulkMoveForm extends HTMLElement {
     private sourceSelect: SlSelect;

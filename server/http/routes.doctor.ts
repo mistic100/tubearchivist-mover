@@ -1,19 +1,19 @@
 import { BunRequest } from 'bun';
-import { getChannel, listEmptyChannels } from "../es/channel.ts";
-import { getVideo, listChannelNameMismatch, listMediaUrlMismatch, updateVideo } from "../es/video.ts";
-import { deleteChannel } from '../ta/channel.ts';
+import { getChannel, listEmptyChannels } from '../es/channel';
+import { getVideo, listChannelNameMismatch, listMediaUrlMismatch, updateVideo } from '../es/video';
+import { deleteChannel } from '../ta/channel';
 
-export async function handleMediaUrlMismatch(req: Request) {
+export async function handleMediaUrlMismatch() {
     const videos = await listMediaUrlMismatch();
     return Response.json({ items: videos });
 }
 
-export async function handleChannelNameMismatch(req: Request) {
+export async function handleChannelNameMismatch() {
     const videos = await listChannelNameMismatch();
     return Response.json({ items: videos });
 }
 
-export async function handleEmptyChannel(req: Request) {
+export async function handleEmptyChannel() {
     const channels = await listEmptyChannels();
     return Response.json({ items: channels });
 }

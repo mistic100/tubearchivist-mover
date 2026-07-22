@@ -22,6 +22,7 @@ export async function taFetch<T>(url: string, method: "GET" | "POST" | "DELETE",
                 "Content-Type": "application/json",
             },
             body: body ? JSON.stringify(body) : undefined,
+            signal: AbortSignal.timeout(5000),
         }
     );
 

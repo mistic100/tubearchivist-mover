@@ -1,8 +1,8 @@
 import { SlButton } from '@shoelace-style/shoelace';
-import { ChannelRenameQuery } from '../../types/ChannelRenameQuery';
-import { ChannelRenameResult } from '../../types/ChannelRenameResult';
-import { loadChannels } from "./common.ts";
-import { createAlert, postJson } from "./utils.ts";
+import { ChannelRenameQuery } from 'types/ChannelRenameQuery';
+import { ChannelRenameResult } from 'types/ChannelRenameResult';
+import { loadChannels } from './common';
+import { createAlert, postJson } from './utils';
 
 class RenameChannelForm extends HTMLElement {
     private form: HTMLFormElement;
