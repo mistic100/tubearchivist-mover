@@ -7,4 +7,6 @@ COPY . .
 RUN bun install --production --frozen-lockfile
 EXPOSE 9000
 
+ENV NODE_ENV=production
+
 CMD ["bun", "server/index.ts"]

@@ -1,4 +1,4 @@
-import { SlButton } from '@shoelace-style/shoelace';
+import type WaButton from '@awesome.me/webawesome/dist/components/button/button.js';
 import { ChannelDoc } from 'types/ChannelDoc';
 import { ChannelNameMismatchDoc } from 'types/ChannelNameMismatchDoc';
 import { VideoDoc } from 'types/VideoDoc';
@@ -10,19 +10,19 @@ class TaDoctorItem extends HTMLElement {
     connectedCallback() {
         this.render();
 
-        this.querySelector('sl-button')!.addEventListener('click', () => this.dispatchEvent(new Event('fix')));
+        this.querySelector('wa-button')!.addEventListener('click', () => this.dispatchEvent(new Event('fix')));
     }
 
     render() {
         this.innerHTML = `
-        <sl-alert variant="warning" open>
+        <wa-callout variant="warning">
             <div class="container">
                 <div class="message">
                     ${this.message}
                 </div>
-                <sl-button variant="primary">Fix</sl-button>
+                <wa-button variant="warning" size="xs">Fix</wa-button>
             </div>
-        </sl-alert>
+        </wa-callout>
 
         <style>
         .container {
@@ -37,7 +37,7 @@ class TaDoctorItem extends HTMLElement {
                 padding-right: 1em;
             }
 
-            sl-button {
+            wa-button {
                 flex: none;
             }
         }
@@ -51,7 +51,7 @@ customElements.define("ta-doctor-item", TaDoctorItem);
 abstract class TaDoctorBase<T> extends HTMLElement {
     private content: HTMLElement;
     private alertSlot: HTMLElement;
-    private refreshButton: SlButton;
+    private refreshButton: WaButton;
     
     abstract _title: string;
     abstract _url: string;
@@ -62,9 +62,9 @@ abstract class TaDoctorBase<T> extends HTMLElement {
         this.render();
         this.content = this.querySelector('#content')!;
         this.alertSlot = this.querySelector("#alert-slot")!;
-        this.refreshButton = this.querySelector('sl-button')!;
+        this.refreshButton = this.querySelector('wa-button')!;
 
-        this.querySelector('sl-details')!.addEventListener('sl-show', () => this.load());
+        this.querySelector('wa-details')!.addEventListener('wa-show', () => this.load());
         this.refreshButton.addEventListener("click", () => {
             this._loaded = false;
             this.load();
@@ -73,11 +73,11 @@ abstract class TaDoctorBase<T> extends HTMLElement {
 
     render() {
         this.innerHTML = `
-        <sl-details summary="${this._title}" style="margin-bottom: 1rem">
+        <wa-details summary="${this._title}" style="margin-bottom: 1rem">
             <div id="alert-slot"></div>
             <div id="content"></div>
-            <sl-button type="button" variant="primary">Refresh</sl-button>
-        </sl-details>
+            <wa-button type="button" variant="brand">Refresh</wa-button>
+        </wa-details>
         `;
     }
 

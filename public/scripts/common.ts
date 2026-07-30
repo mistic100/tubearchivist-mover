@@ -1,10 +1,10 @@
-import { SlSelect } from '@shoelace-style/shoelace';
+import type WaSelect from '@awesome.me/webawesome/dist/components/select/select.js';
 import { ChannelDoc } from 'types/ChannelDoc';
 import { fetchJson } from './utils';
 
 let allChannels: Promise<ChannelDoc[]>;
 
-export async function loadChannels(select: SlSelect) {
+export async function loadChannels(select: WaSelect) {
     if (!allChannels) {
         allChannels = fetchJson<{ channels: ChannelDoc[] }>('/api/channels')
             .then(({ ok, data }) => ok ? data.channels : [])
@@ -12,7 +12,7 @@ export async function loadChannels(select: SlSelect) {
     }
 
     for (const channel of await allChannels) {
-        const option = document.createElement('sl-option');
+        const option = document.createElement('wa-option');
         option.value = channel.channel_id;
         option.innerText = channel.channel_name;
         select.append(option);

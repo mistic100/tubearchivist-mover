@@ -1,4 +1,4 @@
-import { SlBadge } from '@shoelace-style/shoelace';
+import type WaBadge from '@awesome.me/webawesome/dist/components/badge/badge.js';
 import { HealthResult } from 'types/HealthResult';
 import { fetchJson } from './utils';
 
@@ -11,10 +11,10 @@ class StatusBadge extends HTMLElement {
     render() {
         this.innerHTML = `
         Status :
-        <sl-badge variant="neutral" pill data-status="es">ElasticSearch API</sl-badge>
-        <sl-badge variant="neutral" pill data-status="ta">TubeArchivist API</sl-badge>
-        <sl-badge variant="neutral" pill data-status="data">Data directory</sl-badge>
-        <sl-badge variant="neutral" pill data-status="cache">Cache directory</sl-badge>
+        <wa-badge variant="neutral" pill data-status="es">ElasticSearch API</wa-badge>
+        <wa-badge variant="neutral" pill data-status="ta">TubeArchivist API</wa-badge>
+        <wa-badge variant="neutral" pill data-status="data">Data directory</wa-badge>
+        <wa-badge variant="neutral" pill data-status="cache">Cache directory</wa-badge>
 
         <style>
         status-badges {
@@ -31,9 +31,9 @@ class StatusBadge extends HTMLElement {
             alert('Cannot contact backend');
         } else {
             for (const [key, value] of Object.entries(data)) {
-                const badge = this.querySelector(`[data-status=${key}]`) as SlBadge;
+                const badge = this.querySelector(`[data-status=${key}]`) as WaBadge;
                 badge.variant = value ? "success" : "danger";
-                badge.pulse = !value;
+                badge.attention = value ? 'none' : 'pulse';
             }
         }
     }

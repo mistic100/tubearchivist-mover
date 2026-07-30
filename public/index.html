@@ -5,8 +5,8 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>TubeArchivist Mover</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.20.1/cdn/themes/light.css" />
-    <script type="module" src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.20.1/cdn/shoelace-autoloader.js"></script>
+    <link rel="stylesheet" href="https://ka-f.webawesome.com/webawesome@3.11.0/styles/webawesome.css" />
+    <script type="module" src="https://ka-f.webawesome.com/webawesome@3.11.0/webawesome.loader.js"></script>
     <link rel="stylesheet" href="./styles.css" />
 </head>
 
@@ -16,23 +16,11 @@
             <h1>TubeArchivist Mover</h1>
         </header>
 
-        <sl-divider></sl-divider>
+        <wa-divider></wa-divider>
 
-        <sl-tab-group placement="start">
-            <sl-tab slot="nav" panel="single">Move a single video</sl-tab>
-            <sl-tab slot="nav" panel="bulk">Move an entire channel</sl-tab>
-            <sl-tab slot="nav" panel="import">Manual import</sl-tab>
-            <sl-tab slot="nav" panel="rename">Rename a channel</sl-tab>
-            <sl-tab slot="nav" panel="doctor">Doctor</sl-tab>
-
-            <sl-tab-panel name="single"><move-form></move-form></sl-tab-panel>
-            <sl-tab-panel name="bulk"><bulk-move-form></bulk-move-form></sl-tab-panel>
-            <sl-tab-panel name="import"><import-form></import-form></sl-tab-panel>
-            <sl-tab-panel name="rename"><rename-channel-form></rename-channel-form></sl-tab-panel>
-            <sl-tab-panel name="doctor"><ta-doctor></ta-doctor></sl-tab-panel>
-        </sl-tab-group>
+        <ta-app></ta-app>
         
-        <sl-divider></sl-divider>
+        <wa-divider></wa-divider>
 
         <footer>
             <status-badges></status-badges>

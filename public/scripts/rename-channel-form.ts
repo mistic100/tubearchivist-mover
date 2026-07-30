@@ -1,4 +1,4 @@
-import { SlButton } from '@shoelace-style/shoelace';
+import type WaButton from '@awesome.me/webawesome/dist/components/button/button.js';
 import { ChannelRenameQuery } from 'types/ChannelRenameQuery';
 import { ChannelRenameResult } from 'types/ChannelRenameResult';
 import { loadChannels } from './common';
@@ -6,29 +6,29 @@ import { createAlert, postJson } from './utils';
 
 class RenameChannelForm extends HTMLElement {
     private form: HTMLFormElement;
-    private submitBtn: SlButton;
+    private submitBtn: WaButton;
     private alertSlot: HTMLElement;
 
     connectedCallback() {
         this.render();
         this.form = this.querySelector("form")!;
-        this.submitBtn = this.querySelector('sl-button[type="submit"]')!;
+        this.submitBtn = this.querySelector('wa-button[type="submit"]')!;
         this.alertSlot = this.querySelector("#alert-slot")!;
 
         this.form.addEventListener("submit", (e) => this.onSubmit(e));
 
-        loadChannels(this.form.querySelector('sl-select[name=channel]')!);
+        loadChannels(this.form.querySelector('wa-select[name=channel]')!);
     }
 
     render() {
         this.innerHTML = `
         <div id="alert-slot"></div>
         <form>
-            <sl-select name="channel" label="Channel" required hoist clearable></sl-select>
+            <wa-select name="channel" label="Channel" required hoist clearable></wa-select>
             <br />
-            <sl-input name="name" label="New channel name" clearable required></sl-input>
+            <wa-input name="name" label="New channel name" clearable required></wa-input>
             <br />
-            <sl-button type="submit" variant="primary">Rename channel</sl-button>
+            <wa-button type="submit" variant="brand">Rename channel</wa-button>
         </form>
         `;
     }

@@ -1,4 +1,5 @@
-import { SlButton, SlInput } from '@shoelace-style/shoelace';
+import type WaButton from '@awesome.me/webawesome/dist/components/button/button.js';
+import type WaInput from '@awesome.me/webawesome/dist/components/input/input.js';
 import { MoveQuery } from 'types/MoveQuery';
 import { MoveResult } from 'types/MoveResult';
 import { VideoDoc } from 'types/VideoDoc';
@@ -6,39 +7,39 @@ import { loadChannels } from './common';
 import { createAlert, extractId, fetchJson, postJson } from './utils';
 
 class MoveForm extends HTMLElement {
-    private videoInput: SlInput;
+    private videoInput: WaInput;
     private form: HTMLFormElement;
-    private submitBtn: SlButton;
+    private submitBtn: WaButton;
     private alertSlot: HTMLElement;
 
     connectedCallback() {
         this.render();
         this.videoInput = this.querySelector('[name="video"]')!;
         this.form = this.querySelector("form")!;
-        this.submitBtn = this.querySelector('sl-button[type="submit"]')!;
+        this.submitBtn = this.querySelector('wa-button[type="submit"]')!;
         this.alertSlot = this.querySelector("#alert-slot")!;
 
-        this.videoInput.addEventListener("sl-change", () => this.previewVideo());
+        this.videoInput.addEventListener("wa-change", () => this.previewVideo());
         this.form.addEventListener("submit", (e) => this.onSubmit(e));
 
-        loadChannels(this.form.querySelector('sl-select[name=channel]')!);
+        loadChannels(this.form.querySelector('wa-select[name=channel]')!);
     }
 
     render() {
         this.innerHTML = `
         <div id="alert-slot"></div>
         <form>
-            <sl-input name="video" label="Video ID or URL" required clearable></sl-input>
+            <wa-input name="video" label="Video ID or URL" required clearable></wa-input>
             <br />
-            <sl-select name="channel" label="Target channel" required hoist clearable></sl-select>
+            <wa-select name="channel" label="Target channel" required hoist clearable></wa-select>
             <br />
-            <sl-button type="submit" variant="primary">Move video</sl-button>
+            <wa-button type="submit" variant="brand">Move video</wa-button>
         </form>
         `;
     }
 
-    setPreview(el: SlInput, text: string) {
-        el.setAttribute('help-text', text);
+    setPreview(el: WaInput, text: string) {
+        el.setAttribute('hint', text);
     }
 
     showAlert(variant: "danger" | "success", message: string) {

@@ -1,4 +1,7 @@
-import { SlButton, SlDialog, SlProgressBar, SlSelect } from '@shoelace-style/shoelace';
+import type WaButton from '@awesome.me/webawesome/dist/components/button/button.js';
+import type WaDialog from '@awesome.me/webawesome/dist/components/dialog/dialog.js';
+import type WaProgressBar from '@awesome.me/webawesome/dist/components/progress-bar/progress-bar.js';
+import type WaSelect from '@awesome.me/webawesome/dist/components/select/select.js';
 import { ChannelDoc } from 'types/ChannelDoc';
 import { MoveQuery } from 'types/MoveQuery';
 import { MoveResult } from 'types/MoveResult';
@@ -6,14 +9,14 @@ import { loadChannels } from './common';
 import { createAlert, fetchJson, postJson } from './utils';
 
 class BulkMoveForm extends HTMLElement {
-    private sourceSelect: SlSelect;
+    private sourceSelect: WaSelect;
     private form: HTMLFormElement;
-    private submitBtn: SlButton;
+    private submitBtn: WaButton;
     private alertSlot: HTMLElement;
-    private dialog: SlDialog;
+    private dialog: WaDialog;
     private dialogCount: HTMLElement;
     private progressWrap: HTMLElement;
-    private progressBar: SlProgressBar;
+    private progressBar: WaProgressBar;
     private progressLabel: HTMLElement;
 
     private pendingMove: { targetId: string, videoIds: string[] };
@@ -22,7 +25,7 @@ class BulkMoveForm extends HTMLElement {
         this.render();
         this.sourceSelect = this.querySelector('[name="source"]')!;
         this.form = this.querySelector("form")!;
-        this.submitBtn = this.querySelector('sl-button[type="submit"]')!;
+        this.submitBtn = this.querySelector('wa-button[type="submit"]')!;
         this.alertSlot = this.querySelector("#alert-slot")!;
 
         this.dialog = this.querySelector("#bulk-confirm-dialog")!;
@@ -32,34 +35,34 @@ class BulkMoveForm extends HTMLElement {
 
         this.form.addEventListener("submit", (e) => this.onSubmit(e));
         this.dialog.querySelector("#bulk-confirm-btn")!.addEventListener("click", () => this.runBulkMove());
-        this.dialog.querySelector("#bulk-cancel-btn")!.addEventListener("click", () => this.dialog.hide());
+        this.dialog.querySelector("#bulk-cancel-btn")!.addEventListener("click", () => this.dialog.open = false);
 
-        loadChannels(this.form.querySelector('sl-select[name=source]')!);
-        loadChannels(this.form.querySelector('sl-select[name=target]')!);
+        loadChannels(this.form.querySelector('wa-select[name=source]')!);
+        loadChannels(this.form.querySelector('wa-select[name=target]')!);
     }
 
     render() {
         this.innerHTML = `
         <div id="alert-slot"></div>
         <form>
-            <sl-select name="source" label="Source channel" required hoist clearable></sl-select>
+            <wa-select name="source" label="Source channel" required hoist clearable></wa-select>
             <br />
-            <sl-select name="target" label="Target channel" required hoist clearable></sl-select>
+            <wa-select name="target" label="Target channel" required hoist clearable></wa-select>
             <br />
-            <sl-button type="submit" variant="primary">Move all videos</sl-button>
+            <wa-button type="submit" variant="brand">Move all videos</wa-button>
         </form>
 
         <div id="bulk-progress-wrap" style="display: none">
-            <sl-progress-bar id="bulk-progress" value="0"></sl-progress-bar>
+            <wa-progress-bar id="bulk-progress" value="0"></wa-progress-bar>
             <div id="bulk-progress-label" class="preview"></div>
         </div>
 
-        <sl-dialog id="bulk-confirm-dialog" label="Confirm bulk move">
+        <wa-dialog id="bulk-confirm-dialog" label="Confirm bulk move">
             <p>You are about to move <strong id="bulk-confirm-count">0</strong> video(s) to the target channel. This renames files and rewrites Elasticsearch documents one by one.</p>
             <p>Are you sure you want to continue?</p>
-            <sl-button id="bulk-cancel-btn" slot="footer" variant="default">Cancel</sl-button>
-            <sl-button id="bulk-confirm-btn" slot="footer" variant="primary">Move videos</sl-button>
-        </sl-dialog>
+            <wa-button id="bulk-cancel-btn" slot="footer" variant="default">Cancel</wa-button>
+            <wa-button id="bulk-confirm-btn" slot="footer" variant="brand">Move videos</wa-button>
+        </wa-dialog>
 
         <style>
             #bulk-progress-wrap {
@@ -104,11 +107,11 @@ class BulkMoveForm extends HTMLElement {
 
         this.pendingMove = { targetId, videoIds: data.videoIds };
         this.dialogCount.textContent = `${data.videoIds.length}`;
-        this.dialog.show();
+        this.dialog.open = true;
     }
 
     async runBulkMove() {
-        this.dialog.hide();
+        this.dialog.open = false;
         const { targetId, videoIds } = this.pendingMove;
         const total = videoIds.length;
 

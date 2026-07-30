@@ -1,6 +1,6 @@
-import { type SlAlert } from '@shoelace-style/shoelace';
+import type WaCallout from '@awesome.me/webawesome/dist/components/callout/callout.js';
 
-export function extractId(input: string): string {
+export function extractId(input: string | null): string {
     if (!input) {
         return "";
     }
@@ -45,13 +45,11 @@ export async function postJson<T>(url: string, body: Record<string, unknown>): P
     }));
 }
 
-export function createAlert(variant: "danger" | "success" | "warning", message: string): SlAlert {
-    const alert = document.createElement("sl-alert") as SlAlert;
+export function createAlert(variant: "danger" | "success" | "warning", message: string): WaCallout {
+    const alert = document.createElement("wa-callout") as WaCallout;
     alert.variant = variant;
-    alert.closable = true;
-    alert.open = true;
     alert.innerHTML = `
-    <sl-icon slot="icon" name="${variant === "success" ? "check2-circle" : "exclamation-octagon"}"></sl-icon>${message}
+    <wa-icon slot="icon" name="${variant === "success" ? "circle-check" : "circle-exclamation"}"></wa-icon>${message}
     `;
     return alert;
 }
