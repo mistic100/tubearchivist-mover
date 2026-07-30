@@ -136,6 +136,7 @@ class ImportForm extends HTMLElement {
     }
 
     async scan() {
+        this.alertSlot.replaceChildren();
         this.content.replaceChildren();
         this.scanButton.loading = true;
 

@@ -8,7 +8,8 @@
   "author": "mistic100",
   "scripts": {
     "dev": "bun --env-file=.env --watch server/index.ts",
-    "start": "bun --env-file=.env server/index.ts"
+    "start": "bun --env-file=.env server/index.ts",
+    "lint": "eslint --fix"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

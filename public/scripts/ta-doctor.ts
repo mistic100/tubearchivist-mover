@@ -1,4 +1,4 @@
-import { SlSpinner } from '@shoelace-style/shoelace';
+import { SlButton } from '@shoelace-style/shoelace';
 import { ChannelDoc } from 'types/ChannelDoc';
 import { ChannelNameMismatchDoc } from 'types/ChannelNameMismatchDoc';
 import { VideoDoc } from 'types/VideoDoc';
@@ -50,8 +50,8 @@ customElements.define("ta-doctor-item", TaDoctorItem);
 
 abstract class TaDoctorBase<T> extends HTMLElement {
     private content: HTMLElement;
-    private spinner: SlSpinner;
     private alertSlot: HTMLElement;
+    private refreshButton: SlButton;
     
     abstract _title: string;
     abstract _url: string;
@@ -61,18 +61,22 @@ abstract class TaDoctorBase<T> extends HTMLElement {
     connectedCallback() {
         this.render();
         this.content = this.querySelector('#content')!;
-        this.spinner = this.querySelector('sl-spinner')!;
         this.alertSlot = this.querySelector("#alert-slot")!;
+        this.refreshButton = this.querySelector('sl-button')!;
 
         this.querySelector('sl-details')!.addEventListener('sl-show', () => this.load());
+        this.refreshButton.addEventListener("click", () => {
+            this._loaded = false;
+            this.load();
+        });
     }
 
     render() {
         this.innerHTML = `
         <sl-details summary="${this._title}" style="margin-bottom: 1rem">
-            <sl-spinner></sl-spinner>
             <div id="alert-slot"></div>
             <div id="content"></div>
+            <sl-button type="button" variant="primary">Refresh</sl-button>
         </sl-details>
         `;
     }
@@ -86,11 +90,11 @@ abstract class TaDoctorBase<T> extends HTMLElement {
             return;
         }
 
-        this.spinner.style.display = '';
         this.content.replaceChildren();
+        this.alertSlot.replaceChildren();
+        this.refreshButton.loading = true;
 
         const { ok, data } = await fetchJson<{ items: T[] }>(this._url);
-        this.spinner.style.display = 'none';
         this._loaded = true;
 
         if (ok) {
@@ -106,6 +110,8 @@ abstract class TaDoctorBase<T> extends HTMLElement {
         } else {
             this.showAlert("danger", data.message);
         }
+
+        this.refreshButton.loading = false;
     }
 
     async runFix(item: T) {
