@@ -38,9 +38,6 @@ jobs:
         with:
           images: ghcr.io/${{ github.repository }}
 
-      - name: Set package.json version
-        run: npm version ${{ github.ref_name }} --git-tag-version=false
-
       - name: Build and push
         uses: docker/build-push-action@v7
         with:
@@ -48,3 +45,5 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            APP_VERSION=${{ github.ref_name }}
