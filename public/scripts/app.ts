@@ -1,4 +1,5 @@
 import type WaTabGroup from '@awesome.me/webawesome/dist/components/tab-group/tab-group.js';
+import { version } from '../../package.json';
 
 import './status-badges';
 import './move-form';
@@ -22,6 +23,12 @@ class TaApp extends HTMLElement {
 
     render() {
         this.innerHTML = `
+        <header>
+            <h1>TubeArchivist Mover</h1>
+        </header>
+
+        <wa-divider></wa-divider>
+
         <wa-tab-group placement="top">
             <wa-tab slot="nav" panel="single">Move a single video</wa-tab>
             <wa-tab slot="nav" panel="bulk">Move an entire channel</wa-tab>
@@ -35,6 +42,13 @@ class TaApp extends HTMLElement {
             <wa-tab-panel name="rename"><rename-channel-form></rename-channel-form></wa-tab-panel>
             <wa-tab-panel name="doctor"><ta-doctor></ta-doctor></wa-tab-panel>
         </wa-tab-group>
+        
+        <wa-divider></wa-divider>
+
+        <footer>
+            <status-badges></status-badges>
+            <a href="https://github.com/mistic100/tubearchivist-mover">TubeArchivist Mover ${version}</a> - mistic100
+        </footer>
         `;
     }
 

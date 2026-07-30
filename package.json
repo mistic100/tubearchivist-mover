@@ -1,6 +1,6 @@
 {
   "name": "tubearchivist-mover",
-  "version": "1.0.0",
+  "version": "0.0.0-snapshot",
   "description": "Move TubeArchivist videos between channels.",
   "type": "module",
   "private": true,

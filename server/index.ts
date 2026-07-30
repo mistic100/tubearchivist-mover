@@ -1,4 +1,5 @@
 import indexHtml from '../public/index.html';
+import { version } from '../package.json';
 import { config } from './config';
 import {
     handleChannelNameMismatch,
@@ -46,4 +47,5 @@ const server = Bun.serve({
     },
 });
 
+console.log(`TubeArchivist Mover ${version}`);
 console.log(`Listening on ${server.url}`);
