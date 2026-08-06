@@ -31,7 +31,7 @@ class ImportItem extends HTMLElement {
         <wa-details summary="${this.video}" style="margin-bottom: 1rem">
             <div id="alert-slot"></div>
             <form>
-                <wa-input name="title" label="Video title" clearable required></wa-input>
+                <wa-input name="title" label="Video title" with-clear required></wa-input>
                 <br />
                 <wa-select name="channel" label="Channel" required></wa-select>
                 <br/>

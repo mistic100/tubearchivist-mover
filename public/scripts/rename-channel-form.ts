@@ -24,9 +24,9 @@ class RenameChannelForm extends HTMLElement {
         this.innerHTML = `
         <div id="alert-slot"></div>
         <form>
-            <wa-select name="channel" label="Channel" required hoist clearable></wa-select>
+            <wa-select name="channel" label="Channel" required with-clear></wa-select>
             <br />
-            <wa-input name="name" label="New channel name" clearable required></wa-input>
+            <wa-input name="name" label="New channel name" required with-clear></wa-input>
             <br />
             <wa-button type="submit" variant="brand">Rename channel</wa-button>
         </form>

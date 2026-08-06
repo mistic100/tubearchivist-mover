@@ -17,6 +17,7 @@ import {
     handleHealth,
     handleImport,
     handleListChannels,
+    handleListVideos,
     handleMoveVideo,
     handleRenameChannel,
 } from './http/routes';
@@ -26,6 +27,7 @@ const server = Bun.serve({
     routes: {
         "/api/health": handleHealth,
 
+        "/api/videos": handleListVideos,
         "/api/video/:id": handleGetVideo,
         "/api/channels": handleListChannels,
         "/api/channel/:id": handleGetChannel,

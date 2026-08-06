@@ -45,9 +45,9 @@ class BulkMoveForm extends HTMLElement {
         this.innerHTML = `
         <div id="alert-slot"></div>
         <form>
-            <wa-select name="source" label="Source channel" required hoist clearable></wa-select>
+            <wa-select name="source" label="Source channel" required with-clear></wa-select>
             <br />
-            <wa-select name="target" label="Target channel" required hoist clearable></wa-select>
+            <wa-select name="target" label="Target channel" required with-clear></wa-select>
             <br />
             <wa-button type="submit" variant="brand">Move all videos</wa-button>
         </form>

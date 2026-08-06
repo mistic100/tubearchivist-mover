@@ -8,7 +8,7 @@ import { MoveQuery } from 'types/MoveQuery';
 import { config } from '../config.ts';
 import { getAllChannels, getChannel } from '../es/channel';
 import { esHealth } from '../es/client';
-import { getVideo, listChannelVideoIds } from '../es/video';
+import { getVideo, listChannelVideoIds, searchVideos } from '../es/video';
 import { ImportError, importVideo, listImportFiles } from '../services/importVideo';
 import { MoveError, moveVideo } from '../services/moveVideo';
 import { renameChannel, RenameError } from '../services/renameChannel';
@@ -21,6 +21,16 @@ export async function handleHealth() {
         data: await access(config.dataDir, fs.constants.W_OK).then(() => true).catch(() => false),
         cache: await access(config.cacheDir, fs.constants.W_OK).then(() => true).catch(() => false),
     } satisfies HealthResult);
+}
+
+export async function handleListVideos(req: BunRequest) {
+    const q = new URL(req.url).searchParams.get("q")?.trim() || "";
+    if (q.length < 3) {
+        return Response.json({ error: "INVALID_INPUT", message: "Missing q param" }, 400);
+    }
+
+    const videos = await searchVideos(q, 20);
+    return Response.json({ videos });
 }
 
 export async function handleGetVideo(req: BunRequest<":id">) {

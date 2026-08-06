@@ -18,6 +18,19 @@ export async function listChannelVideoIds(channelId: string): Promise<string[]> 
     return hits.map((h) => h.youtube_id);
 }
 
+export async function searchVideos(q: string, size: number): Promise<VideoDoc[]> {
+    return search<VideoDoc>(VIDEO_INDEX, {
+        query: {
+            multi_match: {
+                query: q,
+                fields: ["youtube_id", "title"],
+                fuzziness: "AUTO",
+            },
+        },
+        size,
+    });
+}
+
 export async function updateVideo(
     id: string,
     partial: Partial<VideoDoc>,

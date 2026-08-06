@@ -1,16 +1,5 @@
 import type WaCallout from '@awesome.me/webawesome/dist/components/callout/callout.js';
 
-export function extractId(input: string | null): string {
-    if (!input) {
-        return "";
-    }
-    const value = String(input).trim();
-    if (!value) {
-        return "";
-    }
-    return value.split('/').pop() ?? "";
-}
-
 type QueryResult<T> = { ok: true, data: T } | { ok: false, data: { error: string, message: string } };
 
 async function queryWrapper<T>(query: Promise<Response>): Promise<QueryResult<T>> {
