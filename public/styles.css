@@ -1,5 +1,48 @@
 :not(:defined) {
-  visibility: hidden;
+    visibility: hidden;
+}
+
+:root {
+    --main-bg: #00202f;
+    --highlight-bg: #00293b;
+    --highlight-error: #990202;
+    --highlight-error-light: #c44343;
+    --highlight-bg-transparent: #00293baf;
+    --main-font: #eeeeee;
+    --accent-font-dark: #259485;
+    --accent-font-light: #97d4c8;
+}
+
+@layer wa-color-variant {
+    :where(:root) {
+        --wa-color-brand-95: var(--accent-font-light);
+        --wa-color-brand-90: var(--accent-font-light);
+        --wa-color-brand-80: var(--accent-font-light);
+        --wa-color-brand-70: var(--accent-font-light);
+        --wa-color-brand-60: var(--accent-font-light);
+        --wa-color-brand-50: var(--accent-font-dark);
+        --wa-color-brand-40: var(--accent-font-dark);
+        --wa-color-brand-30: var(--accent-font-dark);
+        --wa-color-brand-20: var(--accent-font-dark);
+        --wa-color-brand-10: var(--accent-font-dark);
+        --wa-color-brand-05: var(--accent-font-dark);
+        --wa-color-brand: var(--accent-font-dark);
+        --wa-color-brand-on: var(--accent-font-light);
+    }
+}
+
+@layer wa-theme {
+    :where(:root) {
+        --wa-border-radius-s: 0 !important;
+        --wa-border-radius-m: 0 !important;
+        --wa-border-radius-l: 0 !important;
+    }
+
+    .wa-dark {
+        --wa-color-text-normal: var(--main-font);
+        --wa-color-surface-default: var(--main-bg);
+        --wa-color-surface-border: var(--accent-font-dark);
+    }
 }
 
 main {
@@ -10,6 +53,10 @@ main {
 
 wa-callout {
     margin-bottom: 1.5rem;
+}
+
+wa-tab-group::part(body) {
+    min-width: 0;
 }
 
 footer {
