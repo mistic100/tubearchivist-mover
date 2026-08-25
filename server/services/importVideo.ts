@@ -6,6 +6,7 @@ import { VideoDoc } from 'types/VideoDoc';
 import { config } from '../config';
 import { getChannel } from '../es/channel';
 import { createVideo } from '../es/video';
+import { generateRandomId } from '../utils';
 
 const IMPORT_FOLDER = 'import';
 const ALLOWED_VIDEO_EXTENSIONS = [".mp4", ".mkv", ".webm"];
@@ -94,7 +95,7 @@ export async function importVideo(payload: ImportQuery): Promise<VideoDoc & { ur
 
     const probe = await getFFprobeData(sourceFile);
 
-    const newId = 'tam-' + generateRandomString(7);
+    const newId = generateRandomId(11);
     const now = Math.round(new Date().getTime() / 1000);
     const duration = Math.round(parseFloat(probe.format.duration));
     const published = Math.round(Date.parse(`${payload.published}`) / 1000);
@@ -159,20 +160,6 @@ export async function importVideo(payload: ImportQuery): Promise<VideoDoc & { ur
         url: `${config.taHost}/video/${newId}`,
     };
 }
-
-function generateRandomString(length: number): string {
-    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_';
-
-    const randomValues = new Uint32Array(length);
-    crypto.getRandomValues(randomValues);
-
-    let result = '';
-    randomValues.forEach((value) => {
-        result += characters.charAt(value % characters.length);
-    });
-    return result;
-}
-
 function formatDuration(duration: number): string {
     if (!isFinite(duration) || duration <= 0) return "0s";
 

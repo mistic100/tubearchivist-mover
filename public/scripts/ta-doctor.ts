@@ -2,6 +2,7 @@ import type WaButton from '@awesome.me/webawesome/dist/components/button/button.
 import { ChannelDoc } from 'types/ChannelDoc';
 import { ChannelNameMismatchDoc } from 'types/ChannelNameMismatchDoc';
 import { VideoDoc } from 'types/VideoDoc';
+import { reloadChannels } from './common';
 import { createAlert, fetchJson, postJson } from './utils';
 
 class TaDoctorItem extends HTMLElement {
@@ -119,6 +120,7 @@ abstract class TaDoctorBase<T> extends HTMLElement {
         if (ok) {
             this._loaded = false;
             this.load();
+            this.onFix();
         } else {
             this.showAlert("danger", data.message);
         }
@@ -127,6 +129,8 @@ abstract class TaDoctorBase<T> extends HTMLElement {
     abstract formatItem(item: T): string;
 
     abstract getItemId(item: T): string;
+
+    onFix() {}
 }
 
 class TaDoctorMediaUrlMismatch extends TaDoctorBase<VideoDoc> {
@@ -184,6 +188,10 @@ class TaDoctorEmptyChannel extends TaDoctorBase<ChannelDoc> {
 
     getItemId(channel: ChannelDoc) {
         return channel.channel_id;
+    }
+
+    override onFix() {
+        reloadChannels().catch(() => {});
     }
 }
 

@@ -1,11 +1,12 @@
 import type WaTabGroup from '@awesome.me/webawesome/dist/components/tab-group/tab-group.js';
 import { version } from '../../package.json';
 
-import './status-badges';
-import './move-form';
 import './bulk-move-form';
-import './rename-channel-form';
+import './create-channel-form';
 import './import-form';
+import './move-form';
+import './rename-channel-form';
+import './status-badges';
 import './ta-doctor';
 
 class TaApp extends HTMLElement {
@@ -34,12 +35,14 @@ class TaApp extends HTMLElement {
             <wa-tab slot="nav" panel="bulk">Move an entire channel</wa-tab>
             <wa-tab slot="nav" panel="import">Manual import</wa-tab>
             <wa-tab slot="nav" panel="rename">Rename a channel</wa-tab>
+            <wa-tab slot="nav" panel="create">Create channel</wa-tab>
             <wa-tab slot="nav" panel="doctor">Doctor</wa-tab>
 
             <wa-tab-panel name="single"><move-form></move-form></wa-tab-panel>
             <wa-tab-panel name="bulk"><bulk-move-form></bulk-move-form></wa-tab-panel>
             <wa-tab-panel name="import"><import-form></import-form></wa-tab-panel>
             <wa-tab-panel name="rename"><rename-channel-form></rename-channel-form></wa-tab-panel>
+            <wa-tab-panel name="create"><create-channel-form></create-channel-form></wa-tab-panel>
             <wa-tab-panel name="doctor"><ta-doctor></ta-doctor></wa-tab-panel>
         </wa-tab-group>
         

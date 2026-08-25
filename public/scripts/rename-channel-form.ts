@@ -1,7 +1,7 @@
 import type WaButton from '@awesome.me/webawesome/dist/components/button/button.js';
 import { ChannelRenameQuery } from 'types/ChannelRenameQuery';
 import { ChannelRenameResult } from 'types/ChannelRenameResult';
-import { loadChannels } from './common';
+import { loadChannels, reloadChannels } from './common';
 import { createAlert, postJson } from './utils';
 
 class RenameChannelForm extends HTMLElement {
@@ -57,6 +57,7 @@ class RenameChannelForm extends HTMLElement {
                 `Renamed channel to "${newName}" (${data.updatedVideos} video(s) updated).`,
             );
             this.form.reset();
+            reloadChannels().catch(() => {});
         } else {
             this.showAlert("danger", data.message);
         }

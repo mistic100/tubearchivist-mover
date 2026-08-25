@@ -1,5 +1,5 @@
 import { ChannelDoc } from 'types/ChannelDoc';
-import { count, get, search, update } from './client';
+import { count, create, get, search, update } from './client';
 import { VIDEO_INDEX } from './video';
 
 const CHANNEL_INDEX = "ta_channel";
@@ -13,6 +13,13 @@ export async function getAllChannels(): Promise<ChannelDoc[]> {
 
 export async function getChannel(id: string): Promise<ChannelDoc | null> {
     return get<ChannelDoc>(CHANNEL_INDEX, id);
+}
+
+export async function createChannel(
+    id: string,
+    channel: ChannelDoc,
+): Promise<void> {
+    await create(CHANNEL_INDEX, id, channel as any);
 }
 
 /**

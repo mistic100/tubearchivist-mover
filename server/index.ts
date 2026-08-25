@@ -1,15 +1,8 @@
-import indexHtml from '../public/index.html';
 import { version } from '../package.json';
+import indexHtml from '../public/index.html';
 import { config } from './config';
 import {
-    handleChannelNameMismatch,
-    handleEmptyChannel,
-    handleFixChannelNameMismatch,
-    handleFixEmptyChannel,
-    handleFixMediaUrlMismatch,
-    handleMediaUrlMismatch,
-} from './http/routes.doctor';
-import {
+    handleCreateChannel,
     handleGetChannel,
     handleGetChannelVideos,
     handleGetImports,
@@ -21,6 +14,14 @@ import {
     handleMoveVideo,
     handleRenameChannel,
 } from './http/routes';
+import {
+    handleChannelNameMismatch,
+    handleEmptyChannel,
+    handleFixChannelNameMismatch,
+    handleFixEmptyChannel,
+    handleFixMediaUrlMismatch,
+    handleMediaUrlMismatch,
+} from './http/routes.doctor';
 
 const server = Bun.serve({
     port: config.port,
@@ -34,6 +35,7 @@ const server = Bun.serve({
         "/api/channel/:id/videos": handleGetChannelVideos,
         "/api/imports": handleGetImports,
         "/api/import": { POST: handleImport },
+        "/api/create-channel": { POST: handleCreateChannel },
         "/api/move-video": { POST: handleMoveVideo },
         "/api/rename-channel": { POST: handleRenameChannel },
 

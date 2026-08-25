@@ -1,6 +1,7 @@
 import { BunRequest } from 'bun';
 import fs from 'node:fs';
 import { access } from 'node:fs/promises';
+import { ChannelCreateQuery } from 'types/ChannelCreateQuery';
 import { ChannelRenameQuery } from 'types/ChannelRenameQuery';
 import { HealthResult } from 'types/HealthResult';
 import { ImportQuery } from 'types/ImportQuery';
@@ -9,6 +10,7 @@ import { config } from '../config.ts';
 import { getAllChannels, getChannel } from '../es/channel';
 import { esHealth } from '../es/client';
 import { getVideo, listChannelVideoIds, searchVideos } from '../es/video';
+import { createChannel, CreateError } from '../services/createChannel';
 import { ImportError, importVideo, listImportFiles } from '../services/importVideo';
 import { MoveError, moveVideo } from '../services/moveVideo';
 import { renameChannel, RenameError } from '../services/renameChannel';
@@ -113,6 +115,20 @@ export async function handleImport(req: Request) {
         return Response.json(result);
     } catch (err) {
         if (err instanceof ImportError) {
+            return err.toResponse();
+        }
+        throw err;
+    }
+}
+
+export async function handleCreateChannel(req: Request) {
+    const payload = await req.json() as ChannelCreateQuery;
+
+    try {
+        const result = await createChannel(payload);
+        return Response.json(result);
+    } catch (err) {
+        if (err instanceof CreateError) {
             return err.toResponse();
         }
         throw err;

@@ -3,15 +3,30 @@ import { ChannelDoc } from 'types/ChannelDoc';
 import { fetchJson } from './utils';
 
 let allChannels: Promise<ChannelDoc[]>;
+const registeredSelects = new Set<WaSelect>();
 
 export async function loadChannels(select: WaSelect) {
+    registeredSelects.add(select);
+
     if (!allChannels) {
-        allChannels = fetchJson<{ channels: ChannelDoc[] }>('/api/channels')
-            .then(({ ok, data }) => ok ? data.channels : [])
-            .then(channels => channels.sort((a, b) => a.channel_name.localeCompare(b.channel_name)));
+        allChannels = _loadChannels();
     }
 
-    for (const channel of await allChannels) {
+    populateSelect(select, await allChannels);
+}
+
+export async function reloadChannels() {
+    allChannels = _loadChannels();
+
+    for (const select of registeredSelects) {
+        populateSelect(select, await allChannels);
+    }
+}
+
+function populateSelect(select: WaSelect, channels: ChannelDoc[]) {
+    select.replaceChildren();
+
+    for (const channel of channels) {
         const option = document.createElement('wa-option');
         option.value = channel.channel_id;
         option.innerText = channel.channel_name;
@@ -19,4 +34,10 @@ export async function loadChannels(select: WaSelect) {
     }
 
     select.setAttribute('value', null as any);
+}
+
+function _loadChannels(): Promise<ChannelDoc[]> {
+    return fetchJson<{ channels: ChannelDoc[] }>('/api/channels')
+        .then(({ ok, data }) => ok ? data.channels : [])
+        .then(channels => channels.sort((a, b) => a.channel_name.localeCompare(b.channel_name)));
 }
