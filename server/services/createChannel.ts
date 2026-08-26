@@ -1,5 +1,7 @@
-import { ChannelDoc } from 'types/ChannelDoc';
+import { mkdir, writeFile } from 'node:fs/promises';
+import { join } from 'node:path';
 import { ChannelCreateQuery } from 'types/ChannelCreateQuery';
+import { ChannelDoc } from 'types/ChannelDoc';
 import { config } from '../config';
 import { createChannel as _createChannel, getAllChannels } from '../es/channel';
 import { generateRandomId } from '../utils';
@@ -56,6 +58,21 @@ export async function createChannel(payload: ChannelCreateQuery): Promise<Channe
         channel_tags: [],
         channel_tabs: ['videos'],
     };
+
+    // If a thumbnail was provided (data URL or base64), store it in cacheDir/channels
+    if (payload.channelThumbBase64) {
+        try {
+            const dataUrl = payload.channelThumbBase64;
+            const match = dataUrl.match(/^data:\w+\/(\w+);base64,(.*)$/);
+            const base64 = match ? match[2] : dataUrl;
+            const destDir = join(config.cacheDir, 'channels');
+            await mkdir(destDir, { recursive: true });
+            const destPath = join(destDir, `${newId}_thumb.jpg`);
+            await writeFile(destPath, Buffer.from(base64, 'base64'));
+        } catch (err) {
+            console.error('Failed to store channel thumbnail', err);
+        }
+    }
 
     await _createChannel(newId, channel);
 

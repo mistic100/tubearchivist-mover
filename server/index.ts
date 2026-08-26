@@ -25,6 +25,7 @@ import {
 
 const server = Bun.serve({
     port: config.port,
+    development: process.env.NODE_ENV !== 'production',
     routes: {
         "/api/health": handleHealth,
 

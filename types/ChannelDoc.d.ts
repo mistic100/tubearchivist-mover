@@ -1,4 +1,4 @@
-export interface ChannelDoc {
+export type ChannelDoc = {
     channel_id: string;
     channel_name: string;
     channel_description: string;
@@ -8,7 +8,4 @@ export interface ChannelDoc {
     channel_subscribed: boolean;
     channel_tags: string[];
     channel_tabs: string[];
-    channel_thumb_url?: string;
-    channel_tvart_url?: string;
-    channel_banner_url?: string;
 };
