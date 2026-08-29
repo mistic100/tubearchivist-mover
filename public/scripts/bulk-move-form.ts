@@ -15,9 +15,7 @@ class BulkMoveForm extends HTMLElement {
     private alertSlot: HTMLElement;
     private dialog: WaDialog;
     private dialogCount: HTMLElement;
-    private progressWrap: HTMLElement;
     private progressBar: WaProgressBar;
-    private progressLabel: HTMLElement;
 
     private pendingMove: { targetId: string, videoIds: string[] };
 
@@ -30,7 +28,6 @@ class BulkMoveForm extends HTMLElement {
 
         this.dialog = this.querySelector("#bulk-confirm-dialog")!;
         this.dialogCount = this.querySelector("#bulk-confirm-count")!;
-        this.progressWrap = this.querySelector("#bulk-progress-wrap")!;
         this.progressBar = this.querySelector("#bulk-progress")!;
 
         this.form.addEventListener("submit", (e) => this.onSubmit(e));
@@ -52,10 +49,7 @@ class BulkMoveForm extends HTMLElement {
             <wa-button type="submit" variant="brand">Move all videos</wa-button>
         </form>
 
-        <div id="bulk-progress-wrap" style="display: none">
-            <wa-progress-bar id="bulk-progress" value="0"></wa-progress-bar>
-            <div id="bulk-progress-label" class="preview"></div>
-        </div>
+        <wa-progress-bar id="bulk-progress" style="display: none" value="0"></wa-progress-bar>
 
         <wa-dialog id="bulk-confirm-dialog" label="Confirm bulk move">
             <p>You are about to move <strong id="bulk-confirm-count">0</strong> video(s) to the target channel. This renames files and rewrites Elasticsearch documents one by one.</p>
@@ -117,7 +111,7 @@ class BulkMoveForm extends HTMLElement {
 
         this.submitBtn.loading = true;
         this.alertSlot.innerHTML = "";
-        this.progressWrap.style.display = "";
+        this.progressBar.style.display = "";
         this.progressBar.value = 0;
 
         let moved = 0;
@@ -126,7 +120,6 @@ class BulkMoveForm extends HTMLElement {
 
         for (let i = 0; i < total; i++) {
             const videoId = videoIds[i];
-            this.progressLabel.textContent = `Moving ${i + 1} of ${total}…`;
             try {
                 const { ok, data } = await postJson<MoveResult>("/api/move-video", { videoId, channelId: targetId } satisfies MoveQuery);
                 if (ok) {
@@ -144,7 +137,6 @@ class BulkMoveForm extends HTMLElement {
             this.progressBar.value = Math.round(((i + 1) / total) * 100);
         }
 
-        this.progressLabel.textContent = `Done: ${moved} moved, ${skipped} skipped, ${failed} failed.`;
         this.submitBtn.loading = false;
 
         const variant = failed > 0 ? "warning" : "success";
