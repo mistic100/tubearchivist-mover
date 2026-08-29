@@ -8,4 +8,5 @@ export type ChannelDoc = {
     channel_subscribed: boolean;
     channel_tags: string[];
     channel_tabs: string[];
+    channel_thumb_url?: string;
 };

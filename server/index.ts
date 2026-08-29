@@ -3,6 +3,7 @@ import indexHtml from '../public/index.html';
 import { config } from './config';
 import {
     handleCreateChannel,
+    handleEditChannel,
     handleGetChannel,
     handleGetChannelVideos,
     handleGetImports,
@@ -12,7 +13,6 @@ import {
     handleListChannels,
     handleListVideos,
     handleMoveVideo,
-    handleRenameChannel,
 } from './http/routes';
 import {
     handleChannelNameMismatch,
@@ -31,14 +31,12 @@ const server = Bun.serve({
 
         "/api/videos": handleListVideos,
         "/api/video/:id": handleGetVideo,
-        "/api/channels": handleListChannels,
-        "/api/channel/:id": handleGetChannel,
+        "/api/channels": { GET: handleListChannels, POST: handleCreateChannel },
+        "/api/channel/:id": { GET: handleGetChannel, POST: handleEditChannel },
         "/api/channel/:id/videos": handleGetChannelVideos,
         "/api/imports": handleGetImports,
         "/api/import": { POST: handleImport },
-        "/api/create-channel": { POST: handleCreateChannel },
         "/api/move-video": { POST: handleMoveVideo },
-        "/api/rename-channel": { POST: handleRenameChannel },
 
         "/api/doctor/media-url-mismatch": handleMediaUrlMismatch,
         "/api/doctor/media-url-mismatch/fix/:id": { POST: handleFixMediaUrlMismatch },

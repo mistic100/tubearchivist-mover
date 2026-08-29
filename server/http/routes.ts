@@ -2,7 +2,7 @@ import { BunRequest } from 'bun';
 import fs from 'node:fs';
 import { access } from 'node:fs/promises';
 import { ChannelCreateQuery } from 'types/ChannelCreateQuery';
-import { ChannelRenameQuery } from 'types/ChannelRenameQuery';
+import { ChannelEditQuery } from 'types/ChannelEditQuery';
 import { HealthResult } from 'types/HealthResult';
 import { ImportQuery } from 'types/ImportQuery';
 import { MoveQuery } from 'types/MoveQuery';
@@ -11,9 +11,9 @@ import { getAllChannels, getChannel } from '../es/channel';
 import { esHealth } from '../es/client';
 import { getVideo, listChannelVideoIds, searchVideos } from '../es/video';
 import { createChannel, CreateError } from '../services/createChannel';
+import { editChannel, EditError } from '../services/editChannel.ts';
 import { ImportError, importVideo, listImportFiles } from '../services/importVideo';
 import { MoveError, moveVideo } from '../services/moveVideo';
-import { renameChannel, RenameError } from '../services/renameChannel';
 import { taHealth } from '../ta/client';
 
 export async function handleHealth() {
@@ -88,14 +88,14 @@ export async function handleMoveVideo(req: Request) {
     }
 }
 
-export async function handleRenameChannel(req: Request) {
-    const payload = await req.json() as ChannelRenameQuery;
+export async function handleEditChannel(req: BunRequest<":id">) {
+    const payload = await req.json() as ChannelEditQuery;
 
     try {
-        const result = await renameChannel(payload);
+        const result = await editChannel(req.params.id, payload);
         return Response.json(result);
     } catch (err) {
-        if (err instanceof RenameError) {
+        if (err instanceof EditError) {
             return err.toResponse();
         }
         throw err;

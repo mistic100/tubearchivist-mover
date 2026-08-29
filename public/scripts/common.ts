@@ -23,6 +23,13 @@ export async function reloadChannels() {
     }
 }
 
+export async function getChannels(): Promise<ChannelDoc[]> {
+    if (!allChannels) {
+        allChannels = _loadChannels();
+    }
+    return await allChannels;
+}
+
 function populateSelect(select: WaSelect, channels: ChannelDoc[]) {
     select.replaceChildren();
 

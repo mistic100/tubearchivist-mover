@@ -46,19 +46,25 @@ export async function createVideo(
 }
 
 /**
- * Update channel.channel_name on every video belonging to a channel.
+ * Update channel name and description on every video belonging to a channel.
  * Returns the number of videos updated.
  */
-export async function updateChannelNameOnVideos(
+export async function updateChannelOnVideos(
     channelId: string,
-    newName: string,
+    params: { channelName: string, channelDescription: string }
 ): Promise<number> {
     return updateByQuery(VIDEO_INDEX, {
         query: { term: { "channel.channel_id": channelId } },
         script: {
-            source: "ctx._source.channel.channel_name = params.name",
+            source: [
+                "ctx._source.channel.channel_name = params.name;",
+                "ctx._source.channel.channel_description = params.description;"
+            ].join(' '),
             lang: "painless",
-            params: { name: newName },
+            params: {
+                name: params.channelName,
+                description: params.channelDescription
+            },
         },
     });
 }

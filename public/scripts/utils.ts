@@ -42,3 +42,38 @@ export function createAlert(variant: "danger" | "success" | "warning", message: 
     `;
     return alert;
 }
+
+export async function processImageFile(input: HTMLInputElement, THUMB_SIZE = 900): Promise<string | undefined> {
+    if (!input.files || !input.files.length) {
+        return undefined;
+    }
+
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onerror = () => reject(new Error('Failed to read file'));
+        reader.onload = () => {
+            const src = reader.result as string;
+            const img = new Image();
+            img.onerror = () => reject(new Error('Invalid image'));
+            img.onload = () => {
+                const size = Math.min(img.width, img.height);
+                const sx = Math.floor((img.width - size) / 2);
+                const sy = Math.floor((img.height - size) / 2);
+
+                const destSize = Math.min(size, THUMB_SIZE);
+
+                const canvas = document.createElement('canvas');
+                canvas.width = destSize;
+                canvas.height = destSize;
+                const ctx = canvas.getContext('2d')!;
+                ctx.drawImage(img, sx, sy, size, size, 0, 0, destSize, destSize);
+
+                // export as jpeg base64
+                const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+                resolve(dataUrl);
+            };
+            img.src = src;
+        };
+        reader.readAsDataURL(input.files![0]);
+    });
+}
