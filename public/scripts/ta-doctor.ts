@@ -55,7 +55,8 @@ abstract class TaDoctorBase<T> extends HTMLElement {
     private refreshButton: WaButton;
     
     abstract _title: string;
-    abstract _url: string;
+    abstract _id: string;
+    abstract _help: string;
     
     _loaded = false;
 
@@ -74,7 +75,12 @@ abstract class TaDoctorBase<T> extends HTMLElement {
 
     render() {
         this.innerHTML = `
-        <wa-details summary="${this._title}" style="margin-bottom: 1rem">
+        <wa-details style="margin-bottom: 1rem">
+            <div slot="summary">
+                ${this._title}
+                <wa-tooltip for="help-${this._id}">${this._help}</wa-tooltip>
+                <wa-icon name="circle-info" id="help-${this._id}"></wa-icon>
+            </div>
             <div id="alert-slot"></div>
             <div id="content"></div>
             <wa-button type="button" variant="brand">Refresh</wa-button>
@@ -95,7 +101,7 @@ abstract class TaDoctorBase<T> extends HTMLElement {
         this.alertSlot.replaceChildren();
         this.refreshButton.loading = true;
 
-        const { ok, data } = await fetchJson<{ items: T[] }>(this._url);
+        const { ok, data } = await fetchJson<{ items: T[] }>(`/api/doctor/${this._id}`);
         this._loaded = true;
 
         if (ok) {
@@ -116,7 +122,7 @@ abstract class TaDoctorBase<T> extends HTMLElement {
     }
 
     async runFix(item: T) {
-        const { ok, data } = await postJson(`${this._url}/fix/${this.getItemId(item)}`, {});
+        const { ok, data } = await postJson(`/api/doctor/${this._id}/fix/${this.getItemId(item)}`, {});
         if (ok) {
             this._loaded = false;
             this.load();
@@ -135,7 +141,8 @@ abstract class TaDoctorBase<T> extends HTMLElement {
 
 class TaDoctorMediaUrlMismatch extends TaDoctorBase<VideoDoc> {
     _title = 'media_url mismatch';
-    _url = '/api/doctor/media-url-mismatch';
+    _id = 'media-url-mismatch';
+    _help = 'Find videos whose "media_url" does not match the disk location.';
 
     formatItem(video: VideoDoc) {
         return `
@@ -155,7 +162,8 @@ customElements.define("ta-doctor-media-url-mismatch", TaDoctorMediaUrlMismatch);
 
 class TaDoctorChannelNameMismatch extends TaDoctorBase<ChannelNameMismatchDoc> {
     _title = 'channel_name mismatch';
-    _url = '/api/doctor/channel-name-mismatch';
+    _id = 'channel-name-mismatch';
+    _help = 'Find videos whose "channel_name" does not match their actual channel\'s name.';
 
     formatItem(video: ChannelNameMismatchDoc) {
         return `
@@ -177,7 +185,8 @@ customElements.define("ta-doctor-channel-name-mismatch", TaDoctorChannelNameMism
 
 class TaDoctorEmptyChannel extends TaDoctorBase<ChannelDoc> {
     _title = 'empty channel';
-    _url = '/api/doctor/empty-channel';
+    _id = 'empty-channel';
+    _help = 'Find channels with no videos.';
 
     formatItem(channel: ChannelDoc) {
         return `
