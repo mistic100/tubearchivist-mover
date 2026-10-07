@@ -19,7 +19,7 @@ export async function listChannelVideoIds(channelId: string): Promise<string[]> 
 }
 
 export async function searchVideos(q: string, size: number): Promise<VideoDoc[]> {
-    return search<VideoDoc>(VIDEO_INDEX, {
+    const hits = await search<VideoDoc>(VIDEO_INDEX, {
         query: {
             multi_match: {
                 query: q,
@@ -29,6 +29,10 @@ export async function searchVideos(q: string, size: number): Promise<VideoDoc[]>
         },
         size,
     });
+    return hits.map((video) => ({
+        ...video,
+        vid_thumb_url: `/cache/videos/${video.youtube_id[0].toLowerCase()}/${video.youtube_id}.jpg`,
+    }));
 }
 
 export async function updateVideo(

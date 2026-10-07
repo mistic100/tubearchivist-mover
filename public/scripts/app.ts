@@ -13,17 +13,13 @@ class TaApp extends HTMLElement {
     private tabs: WaTabGroup;
 
     connectedCallback() {
-        fetch('/api/config')
-            .then(r => r.json())
-            .then(config => {
-                this.render();
-                this.tabs = this.querySelector('wa-tab-group')!;
+        this.render();
+        this.tabs = this.querySelector('wa-tab-group')!;
 
-                const resizeObserver = new ResizeObserver(() => this.onResize());
-                resizeObserver.observe(document.body);
+        const resizeObserver = new ResizeObserver(() => this.onResize());
+        resizeObserver.observe(document.body);
 
-                this.onResize();
-            });
+        this.onResize();
     }
 
     render() {

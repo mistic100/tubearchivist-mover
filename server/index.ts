@@ -22,6 +22,7 @@ import {
     handleFixMediaUrlMismatch,
     handleMediaUrlMismatch,
 } from './http/routes.doctor';
+import { handleCache } from './http/routes.misc';
 
 const server = Bun.serve({
     port: config.port,
@@ -45,11 +46,10 @@ const server = Bun.serve({
         "/api/doctor/empty-channel": handleEmptyChannel,
         "/api/doctor/empty-channel/fix/:id": { POST: handleFixEmptyChannel },
 
-        "/api/config": Response.json({ 
-            TA_HOST: config.taHost,
-        }),
-
         "/api/*": Response.json({ error: "NOT_FOUND", message: "Unknown API route" }, 404),
+
+        "/cache/*": handleCache,
+
         "/": indexHtml,
     },
 });
