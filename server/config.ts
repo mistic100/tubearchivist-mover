@@ -3,6 +3,7 @@ export interface Config {
     dataDir: string;
     cacheDir: string;
     taHost: string;
+    apiUrl: string;
     apiToken: string;
     esUrl: string;
     esUser: string;
@@ -22,11 +23,14 @@ function optional(name: string, fallback: string): string {
     return !value ? fallback : value;
 }
 
+const taHost = required("TA_HOST");
+
 export const config: Config = {
     port: Number.parseInt(optional("PORT", "9000"), 10),
     dataDir: optional("DATA_DIR", "/youtube"),
     cacheDir: optional("CACHE_DIR", "/cache"),
-    taHost: required("TA_HOST"),
+    taHost: taHost,
+    apiUrl: optional("API_URL", taHost),
     apiToken: required("API_TOKEN"),
     esUrl: required("ES_URL"),
     esUser: optional("ELASTIC_USER", "elastic"),

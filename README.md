@@ -27,9 +27,10 @@ A collection of tools to move, rename, import videos in your [TubeArchivist](htt
 | `PORT`             | no       | `9000`      | HTTP port the server listens on.    |
 | `DATA_DIR`         | no       | `/youtube`  | Root of the TA media volume.        |
 | `CACHE_DIR`        | no       | `/cache`    | Root of the TA cache volume.        |
-| `TA_HOST`          | **yes**  |             | HTTP host of TubeArchivist.         |
+| `TA_HOST`          | **yes**  |             | **Public** URL of TubeArchivist.    |
+| `API_URL`          | no       | `$TA_HOST`  | **Private** URL of TubeArchivist (inside the Docker network). |
 | `API_TOKEN`        | **yes**  |             | API token of TubeArchivist.         |
-| `ES_URL`           | **yes**  | —           | Base URL of Elasticsearch.          |
+| `ES_URL`           | **yes**  | —           | URL for your ElasticSearch instance.|
 | `ELASTIC_USER`     | no       | `elastic`   | Elasticsearch username.             |
 | `ELASTIC_PASSWORD` | **yes**  | —           | Elasticsearch password.             |
 
@@ -54,7 +55,8 @@ docker run -d \
   --name tubearchivist-mover \
   --network tubearchivist_default \
   -p 9000:9000 \
-  -e TA_HOST=http://tubearchist:8000 \
+  -e TA_HOST=http://192.168.1.10:8000 \
+  -e API_URL=http://tubearchivist:8000 \
   -e API_TOKEN=verysecret \
   -e ES_URL=http://tubearchivist-es:9200 \
   -e ELASTIC_PASSWORD=verysecret \

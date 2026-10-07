@@ -14,7 +14,7 @@ export async function taFetch<T>(url: string, method: "GET" | "DELETE"): Promise
 export async function taFetch<T>(url: string, method: "POST", body: Record<string, unknown>): Promise<T>;
 export async function taFetch<T>(url: string, method: "GET" | "POST" | "DELETE", body?: Record<string, unknown>): Promise<T> {
     const res = await fetch(
-        `${config.taHost}/api/${url}`,
+        `${config.apiUrl}/api/${url}`,
         {
             method: method,
             headers: {
