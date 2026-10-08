@@ -6,6 +6,7 @@ import { ChannelEditQuery } from 'types/ChannelEditQuery';
 import { HealthResult } from 'types/HealthResult';
 import { ImportQuery } from 'types/ImportQuery';
 import { MoveQuery } from 'types/MoveQuery';
+import { TrimQuery } from 'types/TrimQuery';
 import { config } from '../config.ts';
 import { getAllChannels, getChannel } from '../es/channel';
 import { esHealth } from '../es/client';
@@ -14,6 +15,7 @@ import { createChannel, CreateError } from '../services/createChannel';
 import { editChannel, EditError } from '../services/editChannel.ts';
 import { ImportError, importVideo, listImportFiles } from '../services/importVideo';
 import { MoveError, moveVideo } from '../services/moveVideo';
+import { TrimError, trimVideo } from '../services/trimVideo.ts';
 import { taHealth } from '../ta/client';
 
 export async function handleHealth() {
@@ -129,6 +131,20 @@ export async function handleCreateChannel(req: Request) {
         return Response.json(result);
     } catch (err) {
         if (err instanceof CreateError) {
+            return err.toResponse();
+        }
+        throw err;
+    }
+}
+
+export async function handleTrimVideo(req: Request) {
+    const payload = await req.json() as TrimQuery;
+
+    try {
+        const result = await trimVideo(payload);
+        return Response.json(result);
+    } catch (err) {
+        if (err instanceof TrimError) {
             return err.toResponse();
         }
         throw err;

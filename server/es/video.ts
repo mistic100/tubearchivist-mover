@@ -31,7 +31,9 @@ export async function searchVideos(q: string, size: number): Promise<VideoDoc[]>
     });
     return hits.map((video) => ({
         ...video,
+        // local routes
         vid_thumb_url: `/cache/videos/${video.youtube_id[0].toLowerCase()}/${video.youtube_id}.jpg`,
+        media_url: `/media/${video.media_url}`,
     }));
 }
 

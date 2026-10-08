@@ -18,6 +18,7 @@ A collection of tools to move, rename, import videos in your [TubeArchivist](htt
 - Manually import additional videos
 - Edit a channel name, description and thumbnail
 - Create a new channel
+- Trim videos
 - Integrity checks
 
 ## Environment variables
