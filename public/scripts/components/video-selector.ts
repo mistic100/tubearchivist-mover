@@ -166,8 +166,10 @@ export class VideoSelector extends HTMLElement {
     }
 
     clear() {
+        this.scroller.content?.replaceChildren();
+        this.alertSlot.replaceChildren();
         this.unselectVideo();
-        this.videoInput.setAttribute('value', '');
+        this.videoInput.value = '';
     }
 
 }

@@ -20,12 +20,13 @@ class TrimForm extends HTMLElement {
     private form: HTMLFormElement;
     private submitBtn: WaButton;
     private alertSlot: HTMLElement;
-    private selectedVideo: VideoDoc | null;
+    private videoContainer: HTMLElement;
     private previewVideo: HTMLVideoElement;
     private slider: WaSlider;
     private dialog: HTMLDialogElement;
     private tempVideoElt: HTMLVideoElement;
 
+    private selectedVideo: VideoDoc | null;
     private previousTimestamp = [0, 0];
 
     private loadFrame = throttle((t: number) => this.previewVideo.currentTime = t, 500);
@@ -37,6 +38,7 @@ class TrimForm extends HTMLElement {
         this.form = this.querySelector('form')!;
         this.submitBtn = this.querySelector('wa-button[type="submit"]')!;
         this.alertSlot = this.querySelector('#alert-slot')!;
+        this.videoContainer = this.querySelector('#video-container')!;
         this.previewVideo = this.querySelector('video') as HTMLVideoElement;
         this.slider = this.querySelector('wa-slider') as WaSlider;
 
@@ -53,10 +55,13 @@ class TrimForm extends HTMLElement {
             this.slider.dispatchEvent(new CustomEvent('input'));
         });
 
+        const sliderHintStart = this.slider.querySelector('[slot=reference]:first-child')!;
+        const sliderHintEnd = this.slider.querySelector('[slot=reference]:last-child')!;
+
         this.slider.valueFormatter = formatTime;
         this.slider.addEventListener('input', () => {
-            this.slider.querySelector('[slot=reference]:first-child')!.innerHTML = formatTime(this.slider.minValue);
-            this.slider.querySelector('[slot=reference]:last-child')!.innerHTML = formatTime(this.slider.maxValue);
+            sliderHintStart.innerHTML = formatTime(this.slider.minValue);
+            sliderHintEnd.innerHTML = formatTime(this.slider.maxValue);
 
             if (this.slider.minValue !== this.previousTimestamp[0]) {
                 this.loadFrame(this.slider.minValue);
@@ -90,13 +95,14 @@ class TrimForm extends HTMLElement {
         <form>
             <video-selector></video-selector>
             <br />
-            <video muted style="width:100%;display:none;"></video>
-            <br />
-            <wa-slider name="timestamp" range min="0" max="60" max-value="60" step="0.1" with-tooltip>
-                <span slot="reference">00:00:00.0</span>
-                <span slot="reference">00:01:00.0</span>
-            </wa-slider>
-            <br />
+            <div id="video-container" style="display:none;">
+                <video muted style="width:100%;"></video>
+                <wa-slider name="timestamp" range step="0.1" with-tooltip>
+                    <span slot="reference"></span>
+                    <span slot="reference"></span>
+                </wa-slider>
+                <br />
+            </div>
             <wa-button type="submit" variant="brand">Trim video</wa-button>
         </form>
         
@@ -116,12 +122,12 @@ class TrimForm extends HTMLElement {
         this.selectedVideo = video;
 
         if (!video) {
-            this.previewVideo.style.display = 'none';
+            this.videoContainer.style.display = 'none';
             return;
         }
 
         this.previewVideo.src = video.media_url;
-        this.previewVideo.style.display = 'block';
+        this.videoContainer.style.display = 'block';
     }
 
     async onSubmit(e: Event) {
@@ -129,7 +135,7 @@ class TrimForm extends HTMLElement {
 
         const formData = new FormData(this.form);
         const video = this.selectedVideo;
-        const [start, end] = formData.getAll('timestamp') as  [string, string];
+        const [start, end] = formData.getAll('timestamp') as [string, string];
 
         if (!video) {
             this.showAlert('danger', 'Select a video first');
