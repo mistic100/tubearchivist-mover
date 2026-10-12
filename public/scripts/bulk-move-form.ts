@@ -57,15 +57,6 @@ class BulkMoveForm extends HTMLElement {
             <wa-button id="bulk-cancel-btn" slot="footer" variant="default">Cancel</wa-button>
             <wa-button id="bulk-confirm-btn" slot="footer" variant="brand">Move videos</wa-button>
         </wa-dialog>
-
-        <style>
-            #bulk-progress-wrap {
-                margin-top: 1.5rem;
-                display: flex;
-                flex-direction: column;
-                gap: 0.5rem;
-            }
-        </style>
         `;
     }
 
@@ -110,7 +101,7 @@ class BulkMoveForm extends HTMLElement {
         const total = videoIds.length;
 
         this.submitBtn.loading = true;
-        this.alertSlot.innerHTML = "";
+        this.alertSlot.replaceChildren();
         this.progressBar.style.display = "";
         this.progressBar.value = 0;
 

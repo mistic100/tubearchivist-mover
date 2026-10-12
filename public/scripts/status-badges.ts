@@ -19,7 +19,6 @@ class StatusBadge extends HTMLElement {
         <style>
         status-badges {
             display: block;
-            margin-bottom: 1em;
         }
         </style>
         `;

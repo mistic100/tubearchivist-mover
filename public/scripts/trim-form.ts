@@ -127,8 +127,14 @@ class TrimForm extends HTMLElement {
         });
 
         this.previewVideo.addEventListener('loadedmetadata', () => {
-            this.slider.reset(0, this.previewVideo.duration);
-            this.selectedTimestamp = [0, this.previewVideo.duration];
+            const max = Math.ceil(this.previewVideo.duration * 10) / 10;
+            this.slider.reset(0, max);
+            this.selectedTimestamp = [0, max];
+        });
+
+        this.previewVideo.addEventListener('error', () => {
+            this.selectVideo(null);
+            this.showAlert('danger', 'Failed to load video');
         });
 
         this.slider.addEventListener('trim-slider-change', (e) => {
@@ -174,7 +180,7 @@ class TrimForm extends HTMLElement {
             <wa-button type="submit" variant="brand">Trim video</wa-button>
         </form>
         
-        <wa-dialog id="trim-preview-dialog" label="Preview trimmed video">
+        <wa-dialog id="trim-preview-dialog" label="Preview trimmed video" style="--width: 75vw;">
             <video id="trim-temp-video" controls style="width:100%;"></video>
             <wa-button id="trim-cancel-btn" slot="footer" variant="default" data-dialog="close">Cancel</wa-button>
             <wa-button id="trim-validate-btn" slot="footer" variant="brand" data-dialog="close">Validate</wa-button>
@@ -187,6 +193,8 @@ class TrimForm extends HTMLElement {
     }
 
     async selectVideo(video: VideoDoc | null) {
+        this.alertSlot.replaceChildren();
+
         this.selectedVideo = video;
 
         if (!video) {
@@ -214,6 +222,7 @@ class TrimForm extends HTMLElement {
             return;
         }
 
+        this.alertSlot.replaceChildren();
         this.submitBtn.loading = true;
 
         const { ok, data } = await postJson<string>('/api/trim-video', {

@@ -45,21 +45,10 @@
     }
 }
 
-main {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 2.5rem 1.25rem;
+html {
+    scrollbar-color: var(--accent-font-dark) #0000;
 }
 
 wa-callout {
     margin-bottom: 1.5rem;
-}
-
-wa-tab-group::part(body) {
-    min-width: 0;
-}
-
-footer {
-    color: var(--wa-form-control-hint-color);
-    text-align: center;
 }

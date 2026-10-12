@@ -26,36 +26,66 @@ class TaApp extends HTMLElement {
 
     render() {
         this.innerHTML = `
-        <header>
-            <h1>TubeArchivist Mover</h1>
-        </header>
+        <main>
+            <div id="content">
+                <header>
+                    <h1>TubeArchivist Mover</h1>
+                </header>
 
-        <wa-divider></wa-divider>
+                <wa-tab-group placement="top">
+                    <wa-tab slot="nav" panel="single">Move a single video</wa-tab>
+                    <wa-tab slot="nav" panel="bulk">Move an entire channel</wa-tab>
+                    <wa-tab slot="nav" panel="import">Manual import</wa-tab>
+                    <wa-tab slot="nav" panel="edit">Edit a channel</wa-tab>
+                    <wa-tab slot="nav" panel="create">Create a channel</wa-tab>
+                    <wa-tab slot="nav" panel="trim">Trim video</wa-tab>
+                    <wa-tab slot="nav" panel="doctor">Doctor</wa-tab>
 
-        <wa-tab-group placement="top">
-            <wa-tab slot="nav" panel="single">Move a single video</wa-tab>
-            <wa-tab slot="nav" panel="bulk">Move an entire channel</wa-tab>
-            <wa-tab slot="nav" panel="import">Manual import</wa-tab>
-            <wa-tab slot="nav" panel="edit">Edit a channel</wa-tab>
-            <wa-tab slot="nav" panel="create">Create a channel</wa-tab>
-            <wa-tab slot="nav" panel="trim">Trim video</wa-tab>
-            <wa-tab slot="nav" panel="doctor">Doctor</wa-tab>
-
-            <wa-tab-panel name="single"><move-form></move-form></wa-tab-panel>
-            <wa-tab-panel name="bulk"><bulk-move-form></bulk-move-form></wa-tab-panel>
-            <wa-tab-panel name="import"><import-form></import-form></wa-tab-panel>
-            <wa-tab-panel name="edit"><edit-channel-form></edit-channel-form></wa-tab-panel>
-            <wa-tab-panel name="create"><create-channel-form></create-channel-form></wa-tab-panel>
-            <wa-tab-panel name="trim"><trim-form></trim-form></wa-tab-panel>
-            <wa-tab-panel name="doctor"><ta-doctor></ta-doctor></wa-tab-panel>
-        </wa-tab-group>
-        
-        <wa-divider></wa-divider>
+                    <wa-tab-panel name="single"><move-form></move-form></wa-tab-panel>
+                    <wa-tab-panel name="bulk"><bulk-move-form></bulk-move-form></wa-tab-panel>
+                    <wa-tab-panel name="import"><import-form></import-form></wa-tab-panel>
+                    <wa-tab-panel name="edit"><edit-channel-form></edit-channel-form></wa-tab-panel>
+                    <wa-tab-panel name="create"><create-channel-form></create-channel-form></wa-tab-panel>
+                    <wa-tab-panel name="trim"><trim-form></trim-form></wa-tab-panel>
+                    <wa-tab-panel name="doctor"><ta-doctor></ta-doctor></wa-tab-panel>
+                </wa-tab-group>
+            </div>
+        </main>
 
         <footer>
             <status-badges></status-badges>
             <a href="https://github.com/mistic100/tubearchivist-mover">TubeArchivist Mover ${version}</a> - mistic100
         </footer>
+
+        <style>
+        ta-app {
+            display: grid;
+            grid-template-rows: 1fr auto;
+            min-height: 100vh;
+        }
+
+        header {
+            border-bottom: 2px solid var(--accent-font-dark);
+            padding-bottom: var(--wa-space-m);
+            margin-bottom: var(--wa-space-m);
+        }
+
+        main {
+            min-width: 0;
+        }
+
+        #content {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: var(--wa-space-l);
+        }
+
+        footer {
+            background: var(--highlight-bg);
+            text-align: center;
+            padding: var(--wa-space-m) 0;
+        }
+        </style>
         `;
     }
 
