@@ -82,7 +82,8 @@ services:
     container_name: tubearchivist-mover
     env_file: .env # contains ELASTIC_PASSWORD and API_TOKEN
     environment:
-      TA_HOST: http://tubearchist:8000
+      TA_HOST: http://192.168.1.10:8000
+      API_URL: http://tubearchivist:8000
       ES_URL: http://tubearchivist-es:9200
     ports:
       - '9000:9000'

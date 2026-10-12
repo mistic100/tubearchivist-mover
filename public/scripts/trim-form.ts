@@ -1,4 +1,5 @@
 import type WaButton from '@awesome.me/webawesome/dist/components/button/button.js';
+import type WaInput from '@awesome.me/webawesome/dist/components/input/input.js';
 import type WaSlider from '@awesome.me/webawesome/dist/components/slider/slider.js';
 import { throttle } from 'lodash';
 import { TrimQuery } from 'types/TrimQuery';
@@ -15,6 +16,83 @@ function formatTime(sec: number) {
     return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}${cents.toFixed(1).substring(1)}`;
 }
 
+class TrimSlider extends HTMLElement {
+    private slider: WaSlider;
+    private inputStart: WaInput;
+    private inputEnd: WaInput;
+
+    connectedCallback() {
+        this.render();
+
+        this.slider = this.querySelector<WaSlider>('#trim-slider')!;
+        this.inputStart = this.querySelector<WaInput>('#trim-input-start')!;
+        this.inputEnd = this.querySelector<WaInput>('#trim-input-end')!;
+
+        this.slider.valueFormatter = formatTime;
+
+        this.slider.addEventListener('input', () => {
+            this.inputStart.value = formatTime(this.slider.minValue);
+            this.inputEnd.value = formatTime(this.slider.maxValue);
+
+            this.dispatchEvent(new CustomEvent('trim-slider-change', {
+                detail: [this.slider.minValue, this.slider.maxValue],
+            }));
+        });
+
+        this.inputStart.querySelector('wa-icon[name="minus"]')!.addEventListener('click', () => this.step('min', -1));
+        this.inputStart.querySelector('wa-icon[name="plus"]')!.addEventListener('click', () => this.step('min', 1));
+        this.inputEnd.querySelector('wa-icon[name="minus"]')!.addEventListener('click', () => this.step('max', -1));
+        this.inputEnd.querySelector('wa-icon[name="plus"]')!.addEventListener('click', () => this.step('max', 1));
+    }
+
+    render() {
+        this.innerHTML = `
+        <wa-slider range step="0.1" with-tooltip id="trim-slider">
+            <wa-input slot="reference" size="xs" placeholder="Start" readonly id="trim-input-start">
+                <wa-icon name="minus" slot="start"></wa-icon>
+                <wa-icon name="plus" slot="end"></wa-icon>
+            </wa-input>
+            <wa-input slot="reference" size="xs" placeholder="End" readonly id="trim-input-end">
+                <wa-icon name="minus" slot="start"></wa-icon>
+                <wa-icon name="plus" slot="end"></wa-icon>
+            </wa-input>
+        </wa-slider>
+
+        <style>
+            #trim-slider wa-input {
+                --wa-form-control-padding-inline: 0.5em;
+                width: 9.5em;
+                font-size: var(--wa-font-size-xs);
+            }
+        </style>
+        `;
+    }
+
+    reset(min: number, max: number) {
+        this.slider.min = this.slider.minValue = min;
+        this.slider.max = this.slider.maxValue = max;
+        this.slider.dispatchEvent(new CustomEvent('input'));
+    }
+
+    step(type: 'min' | 'max', inc: 1 | -1) {
+        if (type === 'min' && inc === -1) {
+            this.slider.minValue = Math.max(this.slider.min, this.slider.minValue - 0.1);
+        }
+        if (type === 'min' && inc === 1) {
+            this.slider.minValue = Math.min(this.slider.maxValue, this.slider.minValue + 0.1);
+        }
+        if (type === 'max' && inc === -1) {
+            this.slider.maxValue = Math.max(this.slider.minValue, this.slider.maxValue - 0.1);
+        }
+        if (type === 'max' && inc === 1) {
+            this.slider.maxValue = Math.min(this.slider.max, this.slider.maxValue + 0.1);
+        }
+        this.slider.dispatchEvent(new CustomEvent('input'));
+    }
+}
+
+customElements.define('trim-slider', TrimSlider);
+
 class TrimForm extends HTMLElement {
     private videoSelector: VideoSelector;
     private form: HTMLFormElement;
@@ -22,12 +100,12 @@ class TrimForm extends HTMLElement {
     private alertSlot: HTMLElement;
     private videoContainer: HTMLElement;
     private previewVideo: HTMLVideoElement;
-    private slider: WaSlider;
+    private slider: TrimSlider;
     private dialog: HTMLDialogElement;
     private tempVideoElt: HTMLVideoElement;
 
     private selectedVideo: VideoDoc | null;
-    private previousTimestamp = [0, 0];
+    private selectedTimestamp = [0, 0];
 
     private loadFrame = throttle((t: number) => this.previewVideo.currentTime = t, 500);
 
@@ -39,8 +117,8 @@ class TrimForm extends HTMLElement {
         this.submitBtn = this.querySelector('wa-button[type="submit"]')!;
         this.alertSlot = this.querySelector('#alert-slot')!;
         this.videoContainer = this.querySelector('#video-container')!;
-        this.previewVideo = this.querySelector('video') as HTMLVideoElement;
-        this.slider = this.querySelector('wa-slider') as WaSlider;
+        this.previewVideo = this.querySelector('video')!;
+        this.slider = this.querySelector<TrimSlider>('trim-slider')!;
 
         this.form.addEventListener('submit', (e) => this.onSubmit(e));
 
@@ -49,26 +127,19 @@ class TrimForm extends HTMLElement {
         });
 
         this.previewVideo.addEventListener('loadedmetadata', () => {
-            this.slider.min = this.slider.minValue = 0;
-            this.slider.max = this.slider.maxValue = this.previewVideo.duration;
-            this.previousTimestamp = [this.slider.minValue, this.slider.maxValue];
-            this.slider.dispatchEvent(new CustomEvent('input'));
+            this.slider.reset(0, this.previewVideo.duration);
+            this.selectedTimestamp = [0, this.previewVideo.duration];
         });
 
-        const sliderHintStart = this.slider.querySelector('[slot=reference]:first-child')!;
-        const sliderHintEnd = this.slider.querySelector('[slot=reference]:last-child')!;
+        this.slider.addEventListener('trim-slider-change', (e) => {
+            const [minValue, maxValue] = (e as CustomEvent).detail as [number, number];
 
-        this.slider.valueFormatter = formatTime;
-        this.slider.addEventListener('input', () => {
-            sliderHintStart.innerHTML = formatTime(this.slider.minValue);
-            sliderHintEnd.innerHTML = formatTime(this.slider.maxValue);
-
-            if (this.slider.minValue !== this.previousTimestamp[0]) {
-                this.loadFrame(this.slider.minValue);
-            } else if (this.slider.maxValue !== this.previousTimestamp[1]) {
-                this.loadFrame(this.slider.maxValue);
+            if (minValue !== this.selectedTimestamp[0]) {
+                this.loadFrame(minValue);
+            } else if (maxValue !== this.selectedTimestamp[1]) {
+                this.loadFrame(maxValue);
             }
-            this.previousTimestamp = [this.slider.minValue, this.slider.maxValue];
+            this.selectedTimestamp = [minValue, maxValue];
         });
 
         this.dialog = this.querySelector('#trim-preview-dialog')!;
@@ -97,10 +168,7 @@ class TrimForm extends HTMLElement {
             <br />
             <div id="video-container" style="display:none;">
                 <video muted style="width:100%;"></video>
-                <wa-slider name="timestamp" range step="0.1" with-tooltip>
-                    <span slot="reference"></span>
-                    <span slot="reference"></span>
-                </wa-slider>
+                <trim-slider></trim-slider>
                 <br />
             </div>
             <wa-button type="submit" variant="brand">Trim video</wa-button>
@@ -133,9 +201,8 @@ class TrimForm extends HTMLElement {
     async onSubmit(e: Event) {
         e.preventDefault();
 
-        const formData = new FormData(this.form);
         const video = this.selectedVideo;
-        const [start, end] = formData.getAll('timestamp') as [string, string];
+        const [start, end] = this.selectedTimestamp;
 
         if (!video) {
             this.showAlert('danger', 'Select a video first');
@@ -152,8 +219,8 @@ class TrimForm extends HTMLElement {
         const { ok, data } = await postJson<string>('/api/trim-video', {
             videoId: video.youtube_id,
             action: 'trim',
-            start,
-            end,
+            start: formatTime(start),
+            end: formatTime(end),
         } satisfies TrimQuery);
 
         this.submitBtn.loading = false;
