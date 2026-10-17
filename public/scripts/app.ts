@@ -1,53 +1,66 @@
+import type WaDropdown from '@awesome.me/webawesome/dist/components/dropdown/dropdown.js';
 import type WaTabGroup from '@awesome.me/webawesome/dist/components/tab-group/tab-group.js';
 import { version } from '../../package.json';
 
-import './components/video-selector';
 import './bulk-move-form';
+import './components/video-selector';
 import './create-channel-form';
 import './edit-channel-form';
 import './import-form';
 import './move-form';
-import './trim-form';
 import './status-badges';
 import './ta-doctor';
+import './trim-form';
+
+const tabs = [
+   { id: 'single', component: 'move-form', title: 'Move a single video' },
+   { id: 'bulk', component: 'bulk-move-form', title: 'Move an entire channel' },
+   { id: 'import', component: 'import-form', title: 'Import new videos' },
+   { id: 'edit', component: 'edit-channel-form', title: 'Edit a channel' },
+   { id: 'create', component: 'create-channel-form', title: 'Create a channel' },
+   { id: 'trim', component: 'trim-form', title: 'Trim a video' },
+   { id: 'doctor', component: 'ta-doctor', title: 'Doctor' },
+]
 
 class TaApp extends HTMLElement {
+    private dropdown: WaDropdown;
     private tabs: WaTabGroup;
 
     connectedCallback() {
         this.render();
+        this.dropdown = this.querySelector('wa-dropdown')!;
         this.tabs = this.querySelector('wa-tab-group')!;
 
         const resizeObserver = new ResizeObserver(() => this.onResize());
         resizeObserver.observe(document.body);
 
         this.onResize();
+
+        this.dropdown.addEventListener('wa-select', (e) => {
+            this.tabs.active = (e as CustomEvent).detail.item.value;
+        });
     }
 
     render() {
         this.innerHTML = `
         <main>
             <div id="content">
-                <header>
+                <header class="wa-split">
                     <h1>TubeArchivist Mover</h1>
+
+                    <wa-dropdown id="menu-button">
+                        <wa-button variant="brand" slot="trigger" appearance="outlined">
+                            <wa-icon name="bars" label="Menu"></wa-icon>
+                        </wa-button>
+
+                        ${tabs.map(({ id, title }) => `<wa-dropdown-item value="${id}">${title}</wa-dropdown-item>`).join('')}
+                    </wa-dropdown>
                 </header>
 
-                <wa-tab-group placement="top">
-                    <wa-tab slot="nav" panel="single">Move a single video</wa-tab>
-                    <wa-tab slot="nav" panel="bulk">Move an entire channel</wa-tab>
-                    <wa-tab slot="nav" panel="import">Manual import</wa-tab>
-                    <wa-tab slot="nav" panel="edit">Edit a channel</wa-tab>
-                    <wa-tab slot="nav" panel="create">Create a channel</wa-tab>
-                    <wa-tab slot="nav" panel="trim">Trim video</wa-tab>
-                    <wa-tab slot="nav" panel="doctor">Doctor</wa-tab>
+                <wa-tab-group placement="start">
+                    ${tabs.map(({ id, title }) => `<wa-tab slot="nav" panel="${id}">${title}</wa-tab>`).join('')}
 
-                    <wa-tab-panel name="single"><move-form></move-form></wa-tab-panel>
-                    <wa-tab-panel name="bulk"><bulk-move-form></bulk-move-form></wa-tab-panel>
-                    <wa-tab-panel name="import"><import-form></import-form></wa-tab-panel>
-                    <wa-tab-panel name="edit"><edit-channel-form></edit-channel-form></wa-tab-panel>
-                    <wa-tab-panel name="create"><create-channel-form></create-channel-form></wa-tab-panel>
-                    <wa-tab-panel name="trim"><trim-form></trim-form></wa-tab-panel>
-                    <wa-tab-panel name="doctor"><ta-doctor></ta-doctor></wa-tab-panel>
+                    ${tabs.map(({ id, title, component }) => `<wa-tab-panel name="${id}"><h2>${title}</h2><${component}/></wa-tab-panel>`).join('')}
                 </wa-tab-group>
             </div>
         </main>
@@ -62,6 +75,20 @@ class TaApp extends HTMLElement {
             display: grid;
             grid-template-rows: 1fr auto;
             min-height: 100vh;
+    
+            &.smallscreen {
+                wa-tab-group::part(nav) {
+                    display: none;
+                }
+                wa-tab-group  wa-tab-panel::part(base) {
+                    --padding: 0;
+                }
+            }
+            &:not(.smallscreen) {
+                wa-dropdown {
+                    display: none;
+                }
+            }
         }
 
         header {
@@ -90,7 +117,11 @@ class TaApp extends HTMLElement {
     }
 
     private onResize() {
-        this.tabs.placement = document.body.offsetWidth < 800 ? 'top' : 'start';
+        if (document.body.offsetWidth < 800) {
+            this.classList.add('smallscreen');
+        } else {
+            this.classList.remove('smallscreen');
+        }
     }
 }
 
