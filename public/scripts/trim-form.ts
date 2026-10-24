@@ -159,6 +159,8 @@ class TrimForm extends HTMLElement {
             const src = event.detail?.source;
             if (src !== cancelBtn && src !== validateBtn) {
                 event.preventDefault();
+            } else {
+                this.tempVideoElt.pause();
             }
         });
 
