@@ -21,7 +21,9 @@ import {
     handleFixChannelNameMismatch,
     handleFixEmptyChannel,
     handleFixMediaUrlMismatch,
+    handleFixTempFiles,
     handleMediaUrlMismatch,
+    handleTempFiles,
 } from './http/routes.doctor';
 import { handleCache, handleMedia } from './http/routes.misc';
 
@@ -47,6 +49,8 @@ const server = Bun.serve({
         "/api/doctor/channel-name-mismatch/fix/:id": { POST: handleFixChannelNameMismatch },
         "/api/doctor/empty-channel": handleEmptyChannel,
         "/api/doctor/empty-channel/fix/:id": { POST: handleFixEmptyChannel },
+        "/api/doctor/temp-files": handleTempFiles,
+        "/api/doctor/temp-files/fix/:file": { POST: handleFixTempFiles },
 
         "/api/*": Response.json({ error: "NOT_FOUND", message: "Unknown API route" }, 404),
 

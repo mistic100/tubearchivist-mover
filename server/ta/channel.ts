@@ -4,6 +4,8 @@ import { config } from '../config';
 import { taFetch } from './client';
 
 export async function deleteChannel(id: string): Promise<void> {
+    console.log('Delete channel', id);
+
     await taFetch(`channel/${encodeURIComponent(id)}`, "DELETE");
 }
 

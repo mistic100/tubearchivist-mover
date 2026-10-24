@@ -122,7 +122,7 @@ abstract class TaDoctorBase<T> extends HTMLElement {
     }
 
     async runFix(item: T) {
-        const { ok, data } = await postJson(`/api/doctor/${this._id}/fix/${this.getItemId(item)}`, {});
+        const { ok, data } = await postJson(`/api/doctor/${this._id}/fix/${encodeURIComponent(this.getItemId(item))}`, {});
         if (ok) {
             this._loaded = false;
             this.load();
@@ -206,6 +206,25 @@ class TaDoctorEmptyChannel extends TaDoctorBase<ChannelDoc> {
 
 customElements.define("ta-doctor-empty-channel", TaDoctorEmptyChannel);
 
+
+class TaDoctorTempFilesChannel extends TaDoctorBase<string> {
+    _title = 'temporary files';
+    _id = 'temp-files';
+    _help = 'Find leftover temporary files from aborted trims.';
+
+    formatItem(file: string) {
+        return `
+        file: <code>${file}</code>
+        `;
+    }
+
+    getItemId(file: string) {
+        return file;
+    }
+}
+
+customElements.define("ta-doctor-temp-files", TaDoctorTempFilesChannel);
+
 class TaDoctor extends HTMLElement {
     connectedCallback() {
         this.render();
@@ -216,6 +235,7 @@ class TaDoctor extends HTMLElement {
         <ta-doctor-media-url-mismatch></ta-doctor-media-url-mismatch>
         <ta-doctor-channel-name-mismatch></ta-doctor-channel-name-mismatch>
         <ta-doctor-empty-channel></ta-doctor-empty-channel>
+        <ta-doctor-temp-files></ta-doctor-temp-files>
         `;
     }
 }

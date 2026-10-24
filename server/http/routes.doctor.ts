@@ -2,6 +2,7 @@ import { BunRequest } from 'bun';
 import { getChannel, listEmptyChannels } from '../es/channel';
 import { getVideo, listChannelNameMismatch, listMediaUrlMismatch, updateVideo } from '../es/video';
 import { deleteChannel } from '../ta/channel';
+import { deleteTempFile, listTempFiles } from '../ta/video';
 
 export async function handleMediaUrlMismatch() {
     const videos = await listMediaUrlMismatch();
@@ -16,6 +17,11 @@ export async function handleChannelNameMismatch() {
 export async function handleEmptyChannel() {
     const channels = await listEmptyChannels();
     return Response.json({ items: channels });
+}
+
+export async function handleTempFiles() {
+    const files = await listTempFiles();
+    return Response.json({ items: files });
 }
 
 export async function handleFixMediaUrlMismatch(req: BunRequest<":id">) {
@@ -48,5 +54,10 @@ export async function handleFixChannelNameMismatch(req: BunRequest<":id">) {
 
 export async function handleFixEmptyChannel(req: BunRequest<":id">) {
     await deleteChannel(req.params.id);
+    return Response.json({});
+}
+
+export async function handleFixTempFiles(req: BunRequest<":file">) {
+    await deleteTempFile(req.params.file);
     return Response.json({});
 }
