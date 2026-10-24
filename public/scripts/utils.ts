@@ -1,5 +1,9 @@
 import type WaCallout from '@awesome.me/webawesome/dist/components/callout/callout.js';
 
+export interface LoadableComponent extends HTMLElement {
+    load?(): void;
+};
+
 type QueryResult<T> = { ok: true, data: T } | { ok: false, data: { error: string, message: string } };
 
 async function queryWrapper<T>(query: Promise<Response>): Promise<QueryResult<T>> {

@@ -94,7 +94,7 @@ export class VideoSelector extends HTMLElement {
         this.render();
         this.querySelector('wa-card')?.remove();
 
-        this.alertSlot = this.querySelector("#alert-slot")!;
+        this.alertSlot = this.querySelector("[data-alert-slot]")!;
         this.videoInput = this.querySelector('[name="video"]')!;
         this.scroller = this.querySelector('wa-scroller')!;
 
@@ -114,7 +114,7 @@ export class VideoSelector extends HTMLElement {
 
     render() {
         this.innerHTML = `
-            <div id="alert-slot"></div>
+            <div data-alert-slot></div>
             <wa-card><!-- preload --></wa-card>
             <wa-input name="video" label="Search video" required with-clear></wa-input>
             <wa-scroller orientation="vertical" style="max-height: 300px;"></wa-scroller>

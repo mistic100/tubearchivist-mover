@@ -115,7 +115,7 @@ class TrimForm extends HTMLElement {
         this.videoSelector = this.querySelector('video-selector')!;
         this.form = this.querySelector('form')!;
         this.submitBtn = this.querySelector('wa-button[type="submit"]')!;
-        this.alertSlot = this.querySelector('#alert-slot')!;
+        this.alertSlot = this.querySelector('[data-alert-slot]')!;
         this.videoContainer = this.querySelector('#video-container')!;
         this.previewVideo = this.querySelector('video')!;
         this.slider = this.querySelector<TrimSlider>('trim-slider')!;
@@ -170,7 +170,7 @@ class TrimForm extends HTMLElement {
 
     render() {
         this.innerHTML = `
-        <div id="alert-slot"></div>
+        <div data-alert-slot></div>
         <form>
             <video-selector></video-selector>
             <br />

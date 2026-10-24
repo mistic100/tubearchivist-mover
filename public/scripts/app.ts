@@ -11,6 +11,7 @@ import './move-form';
 import './status-badges';
 import './ta-doctor';
 import './trim-form';
+import { LoadableComponent } from './utils';
 
 const tabs = [
    { id: 'single', component: 'move-form', title: 'Move a single video' },
@@ -20,7 +21,7 @@ const tabs = [
    { id: 'create', component: 'create-channel-form', title: 'Create a channel' },
    { id: 'trim', component: 'trim-form', title: 'Trim a video' },
    { id: 'doctor', component: 'ta-doctor', title: 'Doctor' },
-]
+];
 
 class TaApp extends HTMLElement {
     private dropdown: WaDropdown;
@@ -39,6 +40,13 @@ class TaApp extends HTMLElement {
         this.dropdown.addEventListener('wa-select', (e) => {
             this.tabs.active = (e as CustomEvent).detail.item.value;
         });
+
+        this.tabs.addEventListener('wa-tab-show', () => {
+            const component = tabs.find(({ id }) => id === this.tabs.active)!.component;
+            (this.querySelector(component) as LoadableComponent).load?.();
+        });
+
+        (this.querySelector(tabs[0].component) as LoadableComponent).load?.();
     }
 
     render() {

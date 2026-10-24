@@ -20,7 +20,7 @@ class EditChannelForm extends HTMLElement {
         this.render();
         this.form = this.querySelector("form")!;
         this.submitBtn = this.querySelector('wa-button[type="submit"]')!;
-        this.alertSlot = this.querySelector("#alert-slot")!;
+        this.alertSlot = this.querySelector("[data-alert-slot]")!;
 
         this.channelInput = this.form.querySelector('wa-select[name=channel]')!;
         this.nameInput = this.form.querySelector('wa-input[name=name]')!;
@@ -35,7 +35,7 @@ class EditChannelForm extends HTMLElement {
 
     render() {
         this.innerHTML = `
-        <div id="alert-slot"></div>
+        <div data-alert-slot></div>
         <form>
             <wa-select name="channel" label="Channel" required with-clear></wa-select>
             <br />

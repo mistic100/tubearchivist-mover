@@ -15,14 +15,14 @@ class CreateChannelForm extends HTMLElement {
         this.form = this.querySelector('form')!;
         this.fileInput = this.form.querySelector('input[name=thumb]')!;
         this.submitBtn = this.querySelector('wa-button[type="submit"]')!;
-        this.alertSlot = this.querySelector('#alert-slot')!;
+        this.alertSlot = this.querySelector('[data-alert-slot]')!;
 
         this.form.addEventListener('submit', (e) => this.onSubmit(e));
     }
 
     render() {
         this.innerHTML = `
-        <div id="alert-slot"></div>
+        <div data-alert-slot></div>
         <form>
             <wa-input name="channelName" label="Channel name" required with-clear></wa-input>
             <br />

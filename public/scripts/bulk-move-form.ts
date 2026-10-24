@@ -24,7 +24,7 @@ class BulkMoveForm extends HTMLElement {
         this.sourceSelect = this.querySelector('[name="source"]')!;
         this.form = this.querySelector("form")!;
         this.submitBtn = this.querySelector('wa-button[type="submit"]')!;
-        this.alertSlot = this.querySelector("#alert-slot")!;
+        this.alertSlot = this.querySelector("[data-alert-slot]")!;
 
         this.dialog = this.querySelector("#bulk-confirm-dialog")!;
         this.dialogCount = this.querySelector("#bulk-confirm-count")!;
@@ -40,7 +40,7 @@ class BulkMoveForm extends HTMLElement {
 
     render() {
         this.innerHTML = `
-        <div id="alert-slot"></div>
+        <div data-alert-slot></div>
         <form>
             <wa-select name="source" label="Source channel" required with-clear></wa-select>
             <br />

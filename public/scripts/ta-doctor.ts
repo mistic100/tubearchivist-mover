@@ -1,9 +1,10 @@
+import type WaBadge from '@awesome.me/webawesome/dist/components/badge/badge.js';
 import type WaButton from '@awesome.me/webawesome/dist/components/button/button.js';
 import { ChannelDoc } from 'types/ChannelDoc';
 import { ChannelNameMismatchDoc } from 'types/ChannelNameMismatchDoc';
 import { VideoDoc } from 'types/VideoDoc';
 import { reloadChannels } from './common';
-import { createAlert, fetchJson, postJson } from './utils';
+import { createAlert, fetchJson, LoadableComponent, postJson } from './utils';
 
 class TaDoctorItem extends HTMLElement {
     message = '';
@@ -53,22 +54,20 @@ abstract class TaDoctorBase<T> extends HTMLElement {
     private content: HTMLElement;
     private alertSlot: HTMLElement;
     private refreshButton: WaButton;
-    
+    private badge: WaBadge;
+
     abstract _title: string;
     abstract _id: string;
     abstract _help: string;
-    
-    _loaded = false;
 
     connectedCallback() {
         this.render();
-        this.content = this.querySelector('#content')!;
-        this.alertSlot = this.querySelector("#alert-slot")!;
+        this.content = this.querySelector('[data-content]')!;
+        this.alertSlot = this.querySelector("[data-alert-slot]")!;
         this.refreshButton = this.querySelector('wa-button')!;
+        this.badge = this.querySelector('wa-badge')!;
 
-        this.querySelector('wa-details')!.addEventListener('wa-show', () => this.load());
         this.refreshButton.addEventListener("click", () => {
-            this._loaded = false;
             this.load();
         });
     }
@@ -76,13 +75,16 @@ abstract class TaDoctorBase<T> extends HTMLElement {
     render() {
         this.innerHTML = `
         <wa-details style="margin-bottom: 1rem">
-            <div slot="summary">
-                ${this._title}
-                <wa-tooltip for="help-${this._id}">${this._help}</wa-tooltip>
-                <wa-icon name="circle-info" id="help-${this._id}"></wa-icon>
+            <div slot="summary" class="wa-split">
+                <div>
+                    ${this._title}
+                    <wa-tooltip for="help-${this._id}">${this._help}</wa-tooltip>
+                    <wa-icon name="circle-info" id="help-${this._id}"></wa-icon>
+                </div>
+                <wa-badge variant="neutral" pill>Loading</wa-badge>
             </div>
-            <div id="alert-slot"></div>
-            <div id="content"></div>
+            <div data-alert-slot></div>
+            <div data-content></div>
             <wa-button type="button" variant="brand">Refresh</wa-button>
         </wa-details>
         `;
@@ -93,16 +95,13 @@ abstract class TaDoctorBase<T> extends HTMLElement {
     }
 
     async load() {
-        if (this._loaded) {
-            return;
-        }
-
+        this.badge.variant = 'neutral';
+        this.badge.innerText = 'Loading';
         this.content.replaceChildren();
         this.alertSlot.replaceChildren();
         this.refreshButton.loading = true;
 
         const { ok, data } = await fetchJson<{ items: T[] }>(`/api/doctor/${this._id}`);
-        this._loaded = true;
 
         if (ok) {
             for (const item of data.items) {
@@ -112,9 +111,15 @@ abstract class TaDoctorBase<T> extends HTMLElement {
                 this.content.appendChild(itemElt);
             }
             if (data.items.length === 0) {
-                this.showAlert('success', 'No problem detected');
+                this.badge.variant = 'success';
+                this.badge.innerText = 'No issue detected';
+            } else {
+                this.badge.variant = 'danger';
+                this.badge.innerText = `${data.items.length} issues detected`;
             }
         } else {
+            this.badge.variant = 'danger';
+            this.badge.innerText = 'Error';
             this.showAlert("danger", data.message);
         }
 
@@ -124,7 +129,6 @@ abstract class TaDoctorBase<T> extends HTMLElement {
     async runFix(item: T) {
         const { ok, data } = await postJson(`/api/doctor/${this._id}/fix/${encodeURIComponent(this.getItemId(item))}`, {});
         if (ok) {
-            this._loaded = false;
             this.load();
             this.onFix();
         } else {
@@ -136,7 +140,7 @@ abstract class TaDoctorBase<T> extends HTMLElement {
 
     abstract getItemId(item: T): string;
 
-    onFix() {}
+    onFix() { }
 }
 
 class TaDoctorMediaUrlMismatch extends TaDoctorBase<VideoDoc> {
@@ -200,7 +204,7 @@ class TaDoctorEmptyChannel extends TaDoctorBase<ChannelDoc> {
     }
 
     override onFix() {
-        reloadChannels().catch(() => {});
+        reloadChannels().catch(() => { });
     }
 }
 
@@ -225,9 +229,15 @@ class TaDoctorTempFilesChannel extends TaDoctorBase<string> {
 
 customElements.define("ta-doctor-temp-files", TaDoctorTempFilesChannel);
 
-class TaDoctor extends HTMLElement {
+class TaDoctor extends HTMLElement implements LoadableComponent {
     connectedCallback() {
         this.render();
+    }
+
+    load() {
+        for (const element of this.children) {
+            (element as TaDoctorBase<unknown>).load();
+        }
     }
 
     render() {

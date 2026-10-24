@@ -18,7 +18,7 @@ class ImportItem extends HTMLElement {
         this.form = this.querySelector('form')!;
         this.submitBtn = this.querySelector('wa-button[type="submit"]')!;
         this.channelSelect = this.form.querySelector('wa-select[name="channel"]')!;
-        this.alertSlot = this.querySelector("#alert-slot")!;
+        this.alertSlot = this.querySelector("[data-alert-slot]")!;
 
         this.form.addEventListener('submit', (e) => this.onSubmit(e));
 
@@ -29,7 +29,7 @@ class ImportItem extends HTMLElement {
     render() {
         this.innerHTML = `
         <wa-details summary="${this.video}" style="margin-bottom: 1rem">
-            <div id="alert-slot"></div>
+            <div data-alert-slot></div>
             <form>
                 <wa-input name="title" label="Video title" with-clear required></wa-input>
                 <br />
@@ -113,7 +113,7 @@ class ImportForm extends HTMLElement {
 
     connectedCallback() {
         this.render();
-        this.alertSlot = this.querySelector("#alert-slot")!;
+        this.alertSlot = this.querySelector("[data-alert-slot]")!;
         this.scanButton = this.querySelector('wa-button')!;
         this.content = this.querySelector("#content")!;
 
@@ -126,7 +126,7 @@ class ImportForm extends HTMLElement {
             <wa-icon slot="icon" name="info-circle"></wa-icon>
             Add mp4, mkv, webm files in the <code>import</code> directory of your data folder then click "Scan".
         </wa-callout>
-        <div id="alert-slot"></div>
+        <div data-alert-slot></div>
         <wa-button type="button" variant="brand">Scan</wa-button>
         <div id="content" style="margin-top:1rem;"></div>
         `;
