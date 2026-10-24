@@ -33,7 +33,11 @@ export async function taFetch<T>(url: string, method: "GET" | "POST" | "DELETE",
         );
     }
 
-    return (await res.json()) as T;
+    try {
+        return (await res.json()) as T;
+    } catch {
+        return null as T;
+    }
 }
 
 export async function taHealth(): Promise<boolean> {
